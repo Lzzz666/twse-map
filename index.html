@@ -324,6 +324,128 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+
+    /* ── Foreign stocks modal ── */
+    .foreign-modal {
+      width: 460px;
+      max-width: 95vw;
+      padding: 0;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      background: #fff;
+    }
+
+    .foreign-modal-hdr {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #f4f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .foreign-modal-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .foreign-modal-sub {
+      font-size: 12px;
+      color: #a1a1aa;
+      margin-left: 6px;
+    }
+
+    .foreign-stock-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 4px 0;
+      min-height: 50px;
+    }
+
+    .foreign-empty {
+      padding: 14px 16px;
+      font-size: 12px;
+      color: #a1a1aa;
+    }
+
+    .foreign-stock-row {
+      display: flex;
+      align-items: center;
+      padding: 7px 16px;
+      gap: 8px;
+      transition: background 0.1s;
+    }
+    .foreign-stock-row:hover { background: #fafafa; }
+
+    .market-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      letter-spacing: 0.3px;
+      width: 24px;
+      text-align: center;
+    }
+    .market-us { background: #eff6ff; color: #3b82f6; }
+    .market-jp { background: #fff7ed; color: #ea580c; }
+    .market-kr { background: #fdf4ff; color: #9333ea; }
+
+    .foreign-symbol {
+      font-size: 12px;
+      font-weight: 600;
+      color: #71717a;
+      width: 76px;
+      flex-shrink: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .foreign-name {
+      font-size: 13px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .foreign-price {
+      font-size: 13px;
+      min-width: 64px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .foreign-change {
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 58px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .foreign-add-row {
+      display: flex;
+      padding: 10px 16px 14px;
+      border-top: 1px solid #f4f4f6;
+      flex-shrink: 0;
+    }
+
+    .foreign-hint {
+      padding: 0 16px 10px;
+      font-size: 11px;
+      color: #a1a1aa;
+      flex-shrink: 0;
+    }
+
+    /* Globe button on card header */
+    .globe-btn { color: #a1a1aa; }
+    .globe-btn:hover { color: #3b82f6; background: #eff6ff; }
   </style>
 </head>
 <body>
@@ -361,6 +483,31 @@
     <div class="modal-btns">
       <button class="btn" onclick="closeModal()">取消</button>
       <button class="btn btn-primary" onclick="confirmModal()">確認</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="foreignOverlay" onclick="foreignOverlayClick(event)">
+  <div class="foreign-modal">
+    <div class="foreign-modal-hdr">
+      <div>
+        <span class="foreign-modal-title" id="foreignModalTitle"></span>
+        <span class="foreign-modal-sub">關聯外股</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn" id="foreignRefreshBtn" onclick="refreshForeignStocks()" style="padding:4px 10px;font-size:12px">↻ 更新</button>
+        <button class="icon-btn" title="關閉" onclick="closeForeignModal()" style="font-size:15px;color:#71717a">✕</button>
+      </div>
+    </div>
+    <div id="foreignStockList" class="foreign-stock-list"></div>
+    <div class="foreign-hint">美股直接輸入代號（NVDA）・日股加 .T（6758.T）・韓股加 .KS（005930.KS）</div>
+    <div class="foreign-add-row">
+      <input id="foreignAddInput" class="add-stock-input" type="text"
+        placeholder="NVDA・6758.T・005930.KS"
+        style="border-radius:6px 0 0 6px"
+        onkeydown="if(event.key==='Enter')addForeignStock(this)">
+      <button class="add-stock-btn" onclick="addForeignStock(document.getElementById('foreignAddInput'))"
+        style="border-radius:0 6px 6px 0">+</button>
     </div>
   </div>
 </div>
@@ -433,7 +580,8 @@ const DEFAULT = [
       { code: '2049', name: '上銓',   market: 'tse', change: 0 },
       { code: '3037', name: '欣銓',   market: 'tse', change: 0 },
       { code: '5347', name: '世界',   market: 'tse', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '被動元件',
@@ -441,7 +589,8 @@ const DEFAULT = [
       { code: '2327', name: '國巨',   market: 'tse', change: 0 },
       { code: '2492', name: '華新科', market: 'tse', change: 0 },
       { code: '2330', name: '台積電', market: 'tse', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '廠務',
@@ -449,7 +598,8 @@ const DEFAULT = [
       { code: '1590', name: '亞德客', market: 'tse', change: 0 },
       { code: '2404', name: '漢唐',   market: 'tse', change: 0 },
       { code: '6552', name: '易華電', market: 'tse', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '光通訊',
@@ -457,7 +607,8 @@ const DEFAULT = [
       { code: '3234', name: '光環',   market: 'otc', change: 0 },
       { code: '3491', name: '昇達科', market: 'otc', change: 0 },
       { code: '6782', name: '視達',   market: 'otc', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '低軌衛星',
@@ -465,7 +616,8 @@ const DEFAULT = [
       { code: '3045', name: '台灣大', market: 'tse', change: 0 },
       { code: '3611', name: '鑫創',   market: 'otc', change: 0 },
       { code: '3629', name: '群電',   market: 'otc', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '探針卡',
@@ -473,7 +625,8 @@ const DEFAULT = [
       { code: '6510', name: '精測',   market: 'otc', change: 0 },
       { code: '5225', name: '泰鼎',   market: 'otc', change: 0 },
       { code: '6598', name: '德律',   market: 'tse', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
 ];
 
@@ -495,6 +648,7 @@ function load() {
   try {
     const raw = localStorage.getItem('twse_sectors');
     sectors = raw ? JSON.parse(raw) : DEFAULT;
+    sectors.forEach(s => { if (!s.foreignStocks) s.foreignStocks = []; });
   } catch { sectors = DEFAULT; }
 }
 function save() {
@@ -539,6 +693,13 @@ function buildCard(sector) {
       <span class="sector-badge ${badgeClass(avgVal)}">${fmtPct(avgVal)}</span>
     </div>
     <div style="display:flex;align-items:center;gap:2px">
+      <button class="icon-btn globe-btn" title="關聯外股" onclick="openForeignModal('${sector.id}')">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+          <ellipse cx="7" cy="7" rx="2.6" ry="5.5" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="1.5" y1="7" x2="12.5" y2="7" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
+      </button>
       <button class="icon-btn sort-btn ${sortCls}" title="${sortTitle}" onclick="cycleSortState('${sector.id}')">${sortIcon}</button>
       <div class="card-edit-actions">
         <button class="icon-btn" title="改名" onclick="openRename('${sector.id}')">
@@ -769,6 +930,152 @@ function toast(msg) {
   el.classList.add('show');
   clearTimeout(_toastTimer);
   _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── Foreign stocks ─────────────────────────────────────────────────────────
+let foreignModalSectorId = null;
+
+function detectMarket(symbol) {
+  if (symbol.endsWith('.T'))  return 'JP';
+  if (symbol.endsWith('.KS') || symbol.endsWith('.KQ')) return 'KR';
+  return 'US';
+}
+
+function fmtForeignPrice(price, market) {
+  if (price === null || price === undefined) return '–';
+  if (market === 'JP' || market === 'KR') return Math.round(price).toLocaleString();
+  return price.toFixed(2);
+}
+
+// 批次取得外股報價（呼叫本地 Flask /api/quote）
+async function fetchForeignQuotes(symbols) {
+  if (!symbols.length) return new Map();
+  const res  = await fetch(`/api/quote?symbols=${symbols.join(',')}`);
+  const data = await res.json();
+  return new Map(Object.entries(data));
+}
+
+// 單一代號搜尋（含名稱，用於新增時驗證）
+async function searchForeignSymbol(symbol) {
+  const res = await fetch(`/api/search?symbol=${encodeURIComponent(symbol)}`);
+  if (!res.ok) return null;
+  return await res.json();
+}
+
+function openForeignModal(sectorId) {
+  foreignModalSectorId = sectorId;
+  const s = sectors.find(s => s.id === sectorId);
+  if (!s) return;
+  document.getElementById('foreignModalTitle').textContent = s.name;
+  renderForeignModal();
+  document.getElementById('foreignOverlay').classList.add('open');
+  document.getElementById('foreignAddInput').value = '';
+  if (s.foreignStocks.length) refreshForeignStocks();
+}
+
+function closeForeignModal() {
+  document.getElementById('foreignOverlay').classList.remove('open');
+  foreignModalSectorId = null;
+}
+
+function foreignOverlayClick(e) {
+  if (e.target === e.currentTarget) closeForeignModal();
+}
+
+function renderForeignModal() {
+  const s    = sectors.find(s => s.id === foreignModalSectorId);
+  const list = document.getElementById('foreignStockList');
+  if (!s) { list.innerHTML = ''; return; }
+
+  if (!s.foreignStocks.length) {
+    list.innerHTML = `<div class="foreign-empty">尚未新增關聯外股</div>`;
+    return;
+  }
+
+  list.innerHTML = s.foreignStocks.map(st => {
+    const mktCls   = st.market === 'JP' ? 'market-jp' : st.market === 'KR' ? 'market-kr' : 'market-us';
+    const priceTxt = fmtForeignPrice(st.price, st.market);
+    const chgTxt   = st.change !== null && st.change !== undefined ? fmtPct(st.change) : '–';
+    const cls      = st.change !== null && st.change !== undefined ? chgClass(st.change) : 'chg-flat';
+    return `
+      <div class="foreign-stock-row">
+        <span class="market-badge ${mktCls}">${esc(st.market)}</span>
+        <span class="foreign-symbol">${esc(st.symbol)}</span>
+        <span class="foreign-name">${esc(st.name)}</span>
+        <span class="foreign-price ${cls}">${priceTxt}</span>
+        <span class="foreign-change ${cls}">${chgTxt}</span>
+        <button class="rm-btn" style="display:flex" title="移除" onclick="removeForeignStock('${esc(st.symbol)}')">×</button>
+      </div>`;
+  }).join('');
+}
+
+async function refreshForeignStocks() {
+  const s = sectors.find(s => s.id === foreignModalSectorId);
+  if (!s || !s.foreignStocks.length) return;
+
+  const btn = document.getElementById('foreignRefreshBtn');
+  btn.disabled    = true;
+  btn.textContent = '…';
+
+  try {
+    const symbols = s.foreignStocks.map(st => st.symbol);
+    const lookup  = await fetchForeignQuotes(symbols);
+
+    s.foreignStocks.forEach(st => {
+      const info = lookup.get(st.symbol);
+      if (!info) return;
+      if (info.price  != null)  st.price  = info.price;
+      if (info.change != null)  st.change = info.change;
+    });
+
+    save();
+    renderForeignModal();
+    toast('外股已更新');
+  } catch {
+    toast('外股連線失敗，請稍後再試');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '↻ 更新';
+  }
+}
+
+async function addForeignStock(input) {
+  const symbol = input.value.trim().toUpperCase();
+  if (!symbol) return;
+
+  const s = sectors.find(s => s.id === foreignModalSectorId);
+  if (!s) return;
+
+  if (s.foreignStocks.find(t => t.symbol === symbol)) {
+    toast('該代號已在列表中'); return;
+  }
+
+  input.disabled = true;
+  try {
+    const info = await searchForeignSymbol(symbol);
+    if (!info || info.error) {
+      toast(`找不到代號 ${symbol}，請確認格式`); return;
+    }
+    const market = detectMarket(symbol);
+    s.foreignStocks.push({ symbol, name: info.name, market, price: info.price, change: info.change });
+    input.value = '';
+    save();
+    renderForeignModal();
+    toast(`已新增 ${info.name}（${symbol}）`);
+  } catch {
+    toast('查詢失敗，請確認代號');
+  } finally {
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+function removeForeignStock(symbol) {
+  const s = sectors.find(s => s.id === foreignModalSectorId);
+  if (!s) return;
+  s.foreignStocks = s.foreignStocks.filter(t => t.symbol !== symbol);
+  save();
+  renderForeignModal();
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
