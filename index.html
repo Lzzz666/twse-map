@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台股板塊圖</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', sans-serif;
+      background: #f4f4f6;
+      color: #1a1a1a;
+      min-height: 100vh;
+    }
+
+    /* ── Header ── */
+    header {
+      background: #fff;
+      border-bottom: 1px solid #e2e2e6;
+      padding: 0 24px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    header h1 {
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .data-note {
+      font-size: 12px;
+      color: #aaa;
+      margin-right: 4px;
+    }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 5px 13px;
+      border-radius: 6px;
+      border: 1px solid #d4d4d8;
+      background: #fff;
+      cursor: pointer;
+      font-size: 13px;
+      color: #1a1a1a;
+      transition: background 0.12s, border-color 0.12s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: #f4f4f6; }
+
+    .btn-primary {
+      background: #18181b;
+      color: #fff;
+      border-color: #18181b;
+    }
+    .btn-primary:hover { background: #3f3f46; border-color: #3f3f46; }
+
+    .btn-edit-active {
+      background: #eff6ff;
+      border-color: #3b82f6;
+      color: #3b82f6;
+    }
+    .btn-edit-active:hover { background: #dbeafe; }
+
+    /* ── Main ── */
+    main {
+      padding: 20px 24px;
+      max-width: 1440px;
+      margin: 0 auto;
+    }
+
+    /* ── Grid ── */
+    .sectors-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+      gap: 14px;
+    }
+
+    /* ── Card ── */
+    .sector-card {
+      background: #fff;
+      border-radius: 10px;
+      border: 1px solid #e4e4e7;
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #f4f4f6;
+    }
+
+    .card-title-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sector-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .sector-badge {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 1px 7px;
+      border-radius: 4px;
+    }
+    .badge-up   { background: #fff1f2; color: #e11d48; }
+    .badge-down { background: #f0fdf4; color: #16a34a; }
+    .badge-flat { background: #f4f4f6; color: #71717a; }
+
+    /* Sort button */
+    .sort-btn { color: #a1a1aa; }
+    .sort-btn.sort-desc { color: #e11d48; }
+    .sort-btn.sort-asc  { color: #16a34a; }
+
+    /* Card edit buttons — hidden unless edit mode */
+    .card-edit-actions { display: none; gap: 2px; }
+
+    .icon-btn {
+      width: 26px;
+      height: 26px;
+      border: none;
+      background: transparent;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      color: #a1a1aa;
+      transition: background 0.12s, color 0.12s;
+    }
+    .icon-btn:hover         { background: #f4f4f6; color: #3f3f46; }
+    .icon-btn.del:hover     { background: #fff1f2; color: #e11d48; }
+
+    /* ── Stock rows ── */
+    .stock-list { padding: 4px 0; }
+
+    .stock-row {
+      display: flex;
+      align-items: center;
+      padding: 6px 14px;
+      gap: 8px;
+      transition: background 0.1s;
+    }
+    .stock-row:hover { background: #fafafa; }
+
+    .stock-code {
+      font-size: 12px;
+      font-weight: 600;
+      color: #71717a;
+      width: 36px;
+      flex-shrink: 0;
+    }
+
+    .stock-name {
+      font-size: 13px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .stock-price {
+      font-size: 13px;
+      min-width: 52px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .stock-change {
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 58px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .chg-up   { color: #e11d48; }
+    .chg-down { color: #16a34a; }
+    .chg-flat { color: #a1a1aa; }
+
+    /* Remove stock button — hidden unless edit mode */
+    .rm-btn {
+      width: 18px;
+      height: 18px;
+      border: none;
+      background: transparent;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      color: #d4d4d8;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s, color 0.12s;
+      flex-shrink: 0;
+    }
+    .rm-btn:hover { background: #fff1f2; color: #e11d48; }
+
+    /* ── Add stock row — hidden unless edit mode ── */
+    .add-stock-row {
+      display: none;
+      padding: 6px 14px 10px;
+      gap: 0;
+    }
+    .add-stock-input {
+      flex: 1;
+      border: 1px solid #d4d4d8;
+      border-right: none;
+      border-radius: 6px 0 0 6px;
+      padding: 5px 10px;
+      font-size: 13px;
+      outline: none;
+      background: #fafafa;
+    }
+    .add-stock-input:focus { border-color: #3b82f6; background: #fff; }
+    .add-stock-btn {
+      padding: 5px 12px;
+      background: #18181b;
+      color: #fff;
+      border: none;
+      border-radius: 0 6px 6px 0;
+      cursor: pointer;
+      font-size: 13px;
+      transition: background 0.12s;
+    }
+    .add-stock-btn:hover { background: #3f3f46; }
+
+    /* ── Add sector placeholder card ── */
+    .add-sector-card {
+      border: 2px dashed #d4d4d8;
+      border-radius: 10px;
+      min-height: 72px;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      cursor: pointer;
+      color: #a1a1aa;
+      font-size: 13px;
+      transition: border-color 0.12s, color 0.12s, background 0.12s;
+    }
+    .add-sector-card:hover {
+      border-color: #3b82f6;
+      color: #3b82f6;
+      background: #eff6ff;
+    }
+
+    /* ── Edit mode: reveal hidden elements ── */
+    body.edit-active .card-edit-actions { display: flex; }
+    body.edit-active .rm-btn            { display: flex; }
+    body.edit-active .add-stock-row     { display: flex; }
+    body.edit-active .add-sector-card   { display: flex; }
+
+    /* ── Modal ── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+    }
+    .overlay.open { display: flex; }
+
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 22px 24px 20px;
+      width: 300px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+    }
+    .modal h3 { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+    .modal input {
+      width: 100%;
+      border: 1px solid #d4d4d8;
+      border-radius: 6px;
+      padding: 7px 11px;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 16px;
+    }
+    .modal input:focus { border-color: #3b82f6; }
+    .modal-btns { display: flex; justify-content: flex-end; gap: 8px; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed;
+      bottom: 22px;
+      left: 50%;
+      transform: translateX(-50%) translateY(16px);
+      background: #18181b;
+      color: #fff;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>台股板塊圖</h1>
+  <div class="header-right">
+    <span class="data-note" id="dataNote">–</span>
+    <button class="btn" id="refreshBtn" onclick="refreshAll()">↻ 更新</button>
+    <button class="btn" id="editBtn" onclick="toggleEdit()">編輯</button>
+    <button class="btn" onclick="exportJSON()">匯出</button>
+    <label class="btn" style="cursor:pointer">
+      匯入
+      <input type="file" accept=".json" style="display:none" onchange="importJSON(event)">
+    </label>
+  </div>
+</header>
+
+<main>
+  <div class="sectors-grid" id="grid">
+    <div class="add-sector-card" onclick="openAdd()">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 3v10M3 8h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+      新增板塊
+    </div>
+  </div>
+</main>
+
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal">
+    <h3 id="modalTitle">新增板塊</h3>
+    <input id="modalInput" type="text" placeholder="板塊名稱" maxlength="20"
+      onkeydown="modalKey(event)">
+    <div class="modal-btns">
+      <button class="btn" onclick="closeModal()">取消</button>
+      <button class="btn btn-primary" onclick="confirmModal()">確認</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── Utilities ─────────────────────────────────────────────────────────────
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+}
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+function fmtPct(v) {
+  return (v > 0 ? '+' : '') + v.toFixed(2) + '%';
+}
+function fmtPrice(v) {
+  if (!v) return '–';
+  return v < 10 ? v.toFixed(2) : v < 100 ? v.toFixed(1) : String(Math.round(v));
+}
+function chgClass(v)   { return v > 0 ? 'chg-up' : v < 0 ? 'chg-down' : 'chg-flat'; }
+function badgeClass(v) { return v > 0 ? 'badge-up' : v < 0 ? 'badge-down' : 'badge-flat'; }
+function avg(stocks) {
+  if (!stocks.length) return 0;
+  return stocks.reduce((s, t) => s + t.change, 0) / stocks.length;
+}
+
+// ── TWSE MIS API（透過 CORS Proxy）────────────────────────────────────────
+const MIS_API    = 'https://mis.twse.com.tw/stock/api/getStockInfo.jsp';
+const CORS_PROXY = 'https://corsproxy.io/?url=';
+
+// Parse one msgArray item → { name, market, change } or null
+function parseItem(item) {
+  const price = parseFloat(item.z);
+  const prev  = parseFloat(item.y);
+  const pz    = parseFloat(item.pz);           // last traded price (fallback)
+  const cur   = price > 0 ? price : (pz > 0 ? pz : null);
+  return {
+    name:   (item.n || '').trim(),
+    market: item.ex || 'tse',
+    price:  cur || null,
+    change: (cur && prev > 0) ? (cur - prev) / prev * 100 : null,
+  };
+}
+
+// Query TWSE MIS API; returns Map<code, {name,market,change}>
+async function queryMIS(stocks) {
+  // 永遠兩個都查，讓 API 回傳有效的那個，避免 market 設錯漏抓
+  const codes = [...new Set(stocks.map(st => st.code))];
+  const parts = codes.flatMap(code => [`tse_${code}.tw`, `otc_${code}.tw`]);
+  const rawUrl = `${MIS_API}?ex_ch=${parts.join('|')}&json=1&delay=0`;
+  const res    = await fetch(CORS_PROXY + encodeURIComponent(rawUrl));
+  const data   = await res.json();
+  const map    = new Map();
+  for (const item of (data.msgArray || [])) {
+    if (item.c) map.set(item.c, parseItem(item));
+  }
+  return map;
+}
+
+// ── Default data ───────────────────────────────────────────────────────────
+const DEFAULT = [
+  {
+    id: uid(), name: 'ABF 載板',
+    stocks: [
+      { code: '3673', name: '欣興',   market: 'tse', change: 0 },
+      { code: '2049', name: '上銓',   market: 'tse', change: 0 },
+      { code: '3037', name: '欣銓',   market: 'tse', change: 0 },
+      { code: '5347', name: '世界',   market: 'tse', change: 0 },
+    ]
+  },
+  {
+    id: uid(), name: '被動元件',
+    stocks: [
+      { code: '2327', name: '國巨',   market: 'tse', change: 0 },
+      { code: '2492', name: '華新科', market: 'tse', change: 0 },
+      { code: '2330', name: '台積電', market: 'tse', change: 0 },
+    ]
+  },
+  {
+    id: uid(), name: '廠務',
+    stocks: [
+      { code: '1590', name: '亞德客', market: 'tse', change: 0 },
+      { code: '2404', name: '漢唐',   market: 'tse', change: 0 },
+      { code: '6552', name: '易華電', market: 'tse', change: 0 },
+    ]
+  },
+  {
+    id: uid(), name: '光通訊',
+    stocks: [
+      { code: '3234', name: '光環',   market: 'otc', change: 0 },
+      { code: '3491', name: '昇達科', market: 'otc', change: 0 },
+      { code: '6782', name: '視達',   market: 'otc', change: 0 },
+    ]
+  },
+  {
+    id: uid(), name: '低軌衛星',
+    stocks: [
+      { code: '3045', name: '台灣大', market: 'tse', change: 0 },
+      { code: '3611', name: '鑫創',   market: 'otc', change: 0 },
+      { code: '3629', name: '群電',   market: 'otc', change: 0 },
+    ]
+  },
+  {
+    id: uid(), name: '探針卡',
+    stocks: [
+      { code: '6510', name: '精測',   market: 'otc', change: 0 },
+      { code: '5225', name: '泰鼎',   market: 'otc', change: 0 },
+      { code: '6598', name: '德律',   market: 'tse', change: 0 },
+    ]
+  },
+];
+
+// ── State ──────────────────────────────────────────────────────────────────
+let sectors    = [];
+let editMode   = false;
+let modalMode  = null;   // 'add' | 'rename'
+let renameId   = null;
+const sortStates = {};   // sectorId -> undefined | 'desc' | 'asc'
+
+function cycleSortState(id) {
+  const cur = sortStates[id];
+  sortStates[id] = cur === undefined ? 'desc' : cur === 'desc' ? 'asc' : undefined;
+  render();
+}
+
+// ── Persistence ────────────────────────────────────────────────────────────
+function load() {
+  try {
+    const raw = localStorage.getItem('twse_sectors');
+    sectors = raw ? JSON.parse(raw) : DEFAULT;
+  } catch { sectors = DEFAULT; }
+}
+function save() {
+  localStorage.setItem('twse_sectors', JSON.stringify(sectors));
+}
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function render() {
+  const grid     = document.getElementById('grid');
+  const addCard  = grid.querySelector('.add-sector-card');
+
+  // Remove old cards
+  grid.querySelectorAll('.sector-card').forEach(c => c.remove());
+
+  sectors.forEach(s => grid.insertBefore(buildCard(s), addCard));
+}
+
+function buildCard(sector) {
+  const avgVal   = avg(sector.stocks);
+  const sortMode = sortStates[sector.id];
+
+  // Sort display copy (never mutates stored order)
+  let stocks = [...sector.stocks];
+  if (sortMode === 'desc') stocks.sort((a, b) => (b.change ?? 0) - (a.change ?? 0));
+  if (sortMode === 'asc')  stocks.sort((a, b) => (a.change ?? 0) - (b.change ?? 0));
+
+  const card = document.createElement('div');
+  card.className = 'sector-card';
+  card.dataset.id = sector.id;
+
+  // Sort button icon & class
+  const sortIcon  = sortMode === 'desc' ? '↓' : sortMode === 'asc' ? '↑' : '⇅';
+  const sortCls   = sortMode === 'desc' ? 'sort-desc' : sortMode === 'asc' ? 'sort-asc' : '';
+  const sortTitle = sortMode === 'desc' ? '漲跌高→低' : sortMode === 'asc' ? '漲跌低→高' : '依漲跌排序';
+
+  // Header
+  const hdr = document.createElement('div');
+  hdr.className = 'card-header';
+  hdr.innerHTML = `
+    <div class="card-title-row">
+      <span class="sector-name">${esc(sector.name)}</span>
+      <span class="sector-badge ${badgeClass(avgVal)}">${fmtPct(avgVal)}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:2px">
+      <button class="icon-btn sort-btn ${sortCls}" title="${sortTitle}" onclick="cycleSortState('${sector.id}')">${sortIcon}</button>
+      <div class="card-edit-actions">
+        <button class="icon-btn" title="改名" onclick="openRename('${sector.id}')">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M9 2l2 2-6.5 6.5L2 11l.5-2.5L9 2z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <button class="icon-btn del" title="刪除板塊" onclick="deleteSector('${sector.id}')">
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M2 3h9M5 3V2h3v1M4 3l.5 7.5h4L9 3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
+    </div>`;
+  card.appendChild(hdr);
+
+  // Stock list
+  const list = document.createElement('div');
+  list.className = 'stock-list';
+  if (stocks.length === 0) {
+    list.innerHTML = `<div style="padding:10px 14px;font-size:12px;color:#a1a1aa;">尚無成分股</div>`;
+  } else {
+    stocks.forEach(st => {
+      const row = document.createElement('div');
+      row.className = 'stock-row';
+      row.innerHTML = `
+        <span class="stock-code">${esc(st.code)}</span>
+        <span class="stock-name">${esc(st.name)}</span>
+        <span class="stock-price ${chgClass(st.change)}">${fmtPrice(st.price)}</span>
+        <span class="stock-change ${chgClass(st.change)}">${fmtPct(st.change)}</span>
+        <button class="rm-btn" title="移除" onclick="removeStock('${sector.id}','${esc(st.code)}')">×</button>`;
+      list.appendChild(row);
+    });
+  }
+  card.appendChild(list);
+
+  // Add stock row
+  const addRow = document.createElement('div');
+  addRow.className = 'add-stock-row';
+  addRow.innerHTML = `
+    <input class="add-stock-input" type="text" placeholder="股票代號" maxlength="6"
+      onkeydown="if(event.key==='Enter')addStock('${sector.id}',this)">
+    <button class="add-stock-btn" onclick="addStock('${sector.id}',this.previousElementSibling)">+</button>`;
+  card.appendChild(addRow);
+
+  return card;
+}
+
+// ── Edit mode ──────────────────────────────────────────────────────────────
+function toggleEdit() {
+  editMode = !editMode;
+  document.body.classList.toggle('edit-active', editMode);
+  const btn = document.getElementById('editBtn');
+  btn.textContent = editMode ? '完成' : '編輯';
+  btn.className   = editMode ? 'btn btn-edit-active' : 'btn';
+}
+
+// ── Sector actions ─────────────────────────────────────────────────────────
+function openAdd() {
+  modalMode = 'add';
+  document.getElementById('modalTitle').textContent = '新增板塊';
+  document.getElementById('modalInput').value = '';
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('modalInput').focus(), 40);
+}
+
+function openRename(id) {
+  modalMode = 'rename';
+  renameId  = id;
+  const s   = sectors.find(s => s.id === id);
+  document.getElementById('modalTitle').textContent = '重新命名';
+  document.getElementById('modalInput').value = s ? s.name : '';
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('modalInput').focus(), 40);
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+}
+
+function overlayClick(e) {
+  if (e.target === e.currentTarget) closeModal();
+}
+
+function modalKey(e) {
+  if (e.key === 'Enter')  confirmModal();
+  if (e.key === 'Escape') closeModal();
+}
+
+function confirmModal() {
+  const name = document.getElementById('modalInput').value.trim();
+  if (!name) return;
+  if (modalMode === 'add') {
+    sectors.push({ id: uid(), name, stocks: [] });
+    toast(`已新增「${name}」`);
+  } else {
+    const s = sectors.find(s => s.id === renameId);
+    if (s) { s.name = name; toast('已重新命名'); }
+  }
+  closeModal();
+  save();
+  render();
+}
+
+function deleteSector(id) {
+  const s = sectors.find(s => s.id === id);
+  if (!s || !confirm(`確定刪除「${s.name}」？`)) return;
+  sectors = sectors.filter(s => s.id !== id);
+  save();
+  render();
+  toast('已刪除板塊');
+}
+
+// ── Refresh all ────────────────────────────────────────────────────────────
+async function refreshAll() {
+  const btn = document.getElementById('refreshBtn');
+  btn.disabled = true;
+  btn.textContent = '更新中…';
+
+  // Collect unique stocks across all sectors
+  const seen = new Map();
+  sectors.forEach(s => s.stocks.forEach(st => {
+    if (!seen.has(st.code)) seen.set(st.code, st);
+  }));
+  const allStocks = [...seen.values()];
+
+  if (!allStocks.length) {
+    btn.disabled = false; btn.textContent = '↻ 更新'; return;
+  }
+
+  try {
+    const lookup = await queryMIS(allStocks);
+    let updated = 0;
+
+    sectors.forEach(s => s.stocks.forEach(st => {
+      const info = lookup.get(st.code);
+      if (!info) return;
+      if (info.name)   st.name   = info.name;
+      if (info.market) st.market = info.market;
+      if (info.price  !== null) st.price  = info.price;
+      if (info.change !== null) { st.change = info.change; updated++; }
+    }));
+
+    const now = new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('dataNote').textContent = `更新 ${now}`;
+
+    save();
+    render();
+    toast(updated > 0 ? `已更新 ${updated} 檔` : '非交易時段，顯示最後資料');
+  } catch {
+    toast('連線失敗，請稍後再試');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '↻ 更新';
+  }
+}
+
+// ── Stock actions ──────────────────────────────────────────────────────────
+async function addStock(sectorId, input) {
+  const code = input.value.trim();
+  if (!code) return;
+  const s = sectors.find(s => s.id === sectorId);
+  if (!s) return;
+  if (s.stocks.find(t => t.code === code)) {
+    toast('該代號已在板塊中'); return;
+  }
+
+  input.disabled = true;
+  try {
+    const lookup = await queryMIS([{ code, market: null }]);
+    const info   = lookup.get(code);
+    if (!info || !info.name) {
+      toast(`找不到代號 ${code}`); return;
+    }
+    s.stocks.push({ code, name: info.name, market: info.market, change: info.change ?? 0 });
+    input.value = '';
+    save();
+    render();
+    toast(`已新增 ${info.name}（${code}）`);
+  } catch {
+    toast('查詢失敗，請確認代號');
+  } finally {
+    input.disabled = false;
+  }
+}
+
+function removeStock(sectorId, code) {
+  const s = sectors.find(s => s.id === sectorId);
+  if (!s) return;
+  s.stocks = s.stocks.filter(t => t.code !== code);
+  save();
+  render();
+}
+
+// ── Export / Import ────────────────────────────────────────────────────────
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(sectors, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'twse_sectors.json'; a.click();
+  URL.revokeObjectURL(url);
+  toast('已匯出 JSON');
+}
+
+function importJSON(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (!Array.isArray(data)) throw new Error();
+      sectors = data;
+      save();
+      render();
+      toast('匯入成功');
+    } catch { toast('匯入失敗：格式錯誤'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+let _toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── Init ───────────────────────────────────────────────────────────────────
+load();
+render();
+refreshAll();
+</script>
+</body>
+</html>
