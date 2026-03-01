@@ -446,6 +446,76 @@
     /* Globe button on card header */
     .globe-btn { color: #a1a1aa; }
     .globe-btn:hover { color: #3b82f6; background: #eff6ff; }
+
+    /* ── Notes dot indicator ── */
+    .note-dot {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #3b82f6;
+      vertical-align: middle;
+      margin-left: 4px;
+      flex-shrink: 0;
+    }
+
+    /* ── Notes modal ── */
+    .notes-modal {
+      width: 380px;
+      max-width: 95vw;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .notes-modal-hdr {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #f4f4f6;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .notes-title-row {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .notes-code  { font-size: 12px; font-weight: 600; color: #71717a; }
+    .notes-name  { font-size: 15px; font-weight: 600; }
+    .notes-quote { font-size: 13px; font-weight: 600; }
+
+    .notes-textarea {
+      width: 100%;
+      border: none;
+      resize: none;
+      outline: none;
+      font-size: 13px;
+      line-height: 1.7;
+      padding: 14px 16px;
+      min-height: 150px;
+      font-family: inherit;
+      color: #1a1a1a;
+      background: #fff;
+    }
+    .notes-textarea::placeholder { color: #d4d4d8; }
+
+    .notes-modal-footer {
+      padding: 8px 16px 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      border-top: 1px solid #f4f4f6;
+    }
+
+    .stock-row    { cursor: pointer; }
+    .foreign-stock-row { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -483,6 +553,26 @@
     <div class="modal-btns">
       <button class="btn" onclick="closeModal()">取消</button>
       <button class="btn btn-primary" onclick="confirmModal()">確認</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="notesOverlay" onclick="notesOverlayClick(event)">
+  <div class="notes-modal">
+    <div class="notes-modal-hdr">
+      <div class="notes-title-row">
+        <span class="notes-code" id="notesCode"></span>
+        <span class="notes-name" id="notesName"></span>
+        <span class="notes-quote" id="notesQuote"></span>
+      </div>
+      <button class="icon-btn" title="關閉" onclick="closeNotesModal()" style="font-size:15px;color:#71717a;flex-shrink:0">✕</button>
+    </div>
+    <textarea class="notes-textarea" id="notesTextarea"
+      placeholder="記錄觀察、想法、進出場邏輯…"
+      onkeydown="if(event.key==='Escape')closeNotesModal()"></textarea>
+    <div class="notes-modal-footer">
+      <button class="btn" onclick="closeNotesModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveNote()">儲存</button>
     </div>
   </div>
 </div>
@@ -725,9 +815,13 @@ function buildCard(sector) {
     stocks.forEach(st => {
       const row = document.createElement('div');
       row.className = 'stock-row';
+      row.onclick = e => {
+        if (e.target.closest('.rm-btn')) return;
+        openNotesModal(st.code, st.name, st.price ?? null, st.change ?? null);
+      };
       row.innerHTML = `
         <span class="stock-code">${esc(st.code)}</span>
-        <span class="stock-name">${esc(st.name)}</span>
+        <span class="stock-name">${esc(st.name)}${notes[st.code] ? '<span class="note-dot"></span>' : ''}</span>
         <span class="stock-price ${chgClass(st.change)}">${fmtPrice(st.price)}</span>
         <span class="stock-change ${chgClass(st.change)}">${fmtPct(st.change)}</span>
         <button class="rm-btn" title="移除" onclick="removeStock('${sector.id}','${esc(st.code)}')">×</button>`;
@@ -932,6 +1026,57 @@ function toast(msg) {
   _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
+// ── Notes ──────────────────────────────────────────────────────────────────
+let notes      = {};   // { "代號": "備忘文字", ... }
+let notesStock = null; // 目前開啟的股票 { code, name, price, change }
+
+function loadNotes() {
+  try { notes = JSON.parse(localStorage.getItem('twse_notes') || '{}'); }
+  catch { notes = {}; }
+}
+
+function persistNotes() {
+  localStorage.setItem('twse_notes', JSON.stringify(notes));
+}
+
+function openNotesModal(code, name, price, change) {
+  notesStock = { code, name, price, change };
+  document.getElementById('notesCode').textContent = code;
+  document.getElementById('notesName').textContent = name;
+
+  const q = document.getElementById('notesQuote');
+  if (price != null) {
+    q.textContent = `${price}  ${change != null ? fmtPct(change) : ''}`.trim();
+    q.className   = 'notes-quote ' + chgClass(change ?? 0);
+  } else {
+    q.textContent = '';
+  }
+
+  document.getElementById('notesTextarea').value = notes[code] || '';
+  document.getElementById('notesOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('notesTextarea').focus(), 40);
+}
+
+function closeNotesModal() {
+  document.getElementById('notesOverlay').classList.remove('open');
+  notesStock = null;
+}
+
+function notesOverlayClick(e) {
+  if (e.target === e.currentTarget) closeNotesModal();
+}
+
+function saveNote() {
+  if (!notesStock) return;
+  const text = document.getElementById('notesTextarea').value.trim();
+  if (text) notes[notesStock.code] = text;
+  else      delete notes[notesStock.code];
+  persistNotes();
+  closeNotesModal();
+  render();
+  toast('已儲存');
+}
+
 // ── Foreign stocks ─────────────────────────────────────────────────────────
 let foreignModalSectorId = null;
 
@@ -997,16 +1142,27 @@ function renderForeignModal() {
     const priceTxt = fmtForeignPrice(st.price, st.market);
     const chgTxt   = st.change !== null && st.change !== undefined ? fmtPct(st.change) : '–';
     const cls      = st.change !== null && st.change !== undefined ? chgClass(st.change) : 'chg-flat';
+    const dot      = notes[st.symbol] ? '<span class="note-dot"></span>' : '';
     return `
-      <div class="foreign-stock-row">
+      <div class="foreign-stock-row" data-symbol="${esc(st.symbol)}">
         <span class="market-badge ${mktCls}">${esc(st.market)}</span>
         <span class="foreign-symbol">${esc(st.symbol)}</span>
-        <span class="foreign-name">${esc(st.name)}</span>
+        <span class="foreign-name">${esc(st.name)}${dot}</span>
         <span class="foreign-price ${cls}">${priceTxt}</span>
         <span class="foreign-change ${cls}">${chgTxt}</span>
-        <button class="rm-btn" style="display:flex" title="移除" onclick="removeForeignStock('${esc(st.symbol)}')">×</button>
+        <button class="rm-btn" style="display:flex" title="移除" onclick="event.stopPropagation();removeForeignStock('${esc(st.symbol)}')">×</button>
       </div>`;
   }).join('');
+
+  // 點擊外股列開啟備忘
+  list.querySelectorAll('.foreign-stock-row').forEach(row => {
+    row.onclick = e => {
+      if (e.target.closest('.rm-btn')) return;
+      const sym = row.dataset.symbol;
+      const st  = s.foreignStocks.find(t => t.symbol === sym);
+      if (st) openNotesModal(st.symbol, st.name, st.price ?? null, st.change ?? null);
+    };
+  });
 }
 
 async function refreshForeignStocks() {
@@ -1080,6 +1236,7 @@ function removeForeignStock(symbol) {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 load();
+loadNotes();
 render();
 refreshAll();
 </script>
