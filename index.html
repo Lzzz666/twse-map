@@ -734,15 +734,46 @@ function cycleSortState(id) {
 }
 
 // ── Persistence ────────────────────────────────────────────────────────────
-function load() {
+async function load() {
+  // ── 一次性遷移：把舊 localStorage 資料搬到 data.json ──
+  const oldSectors = localStorage.getItem('twse_sectors');
+  const oldNotes   = localStorage.getItem('twse_notes');
+  if (oldSectors || oldNotes) {
+    try {
+      sectors = JSON.parse(oldSectors || '[]');
+      notes   = JSON.parse(oldNotes   || '{}');
+      if (!sectors.length) sectors = DEFAULT;
+      sectors.forEach(s => { if (!s.foreignStocks) s.foreignStocks = []; });
+      await _persist();
+      localStorage.removeItem('twse_sectors');
+      localStorage.removeItem('twse_notes');
+      console.log('資料已從 localStorage 遷移至 data.json');
+    } catch { sectors = DEFAULT; notes = {}; }
+    return;
+  }
+
+  // ── 正常從 server 讀取 ──
   try {
-    const raw = localStorage.getItem('twse_sectors');
-    sectors = raw ? JSON.parse(raw) : DEFAULT;
+    const res  = await fetch('/api/state');
+    const data = await res.json();
+    sectors = data.sectors?.length ? data.sectors : DEFAULT;
+    notes   = data.notes  || {};
     sectors.forEach(s => { if (!s.foreignStocks) s.foreignStocks = []; });
-  } catch { sectors = DEFAULT; }
+  } catch { sectors = DEFAULT; notes = {}; }
 }
+
+// 防抖存檔：300ms 內多次呼叫只送一次請求
+let _saveTimer;
 function save() {
-  localStorage.setItem('twse_sectors', JSON.stringify(sectors));
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_persist, 300);
+}
+function _persist() {
+  return fetch('/api/state', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ sectors, notes }),
+  }).catch(console.error);
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────
@@ -1030,14 +1061,7 @@ function toast(msg) {
 let notes      = {};   // { "代號": "備忘文字", ... }
 let notesStock = null; // 目前開啟的股票 { code, name, price, change }
 
-function loadNotes() {
-  try { notes = JSON.parse(localStorage.getItem('twse_notes') || '{}'); }
-  catch { notes = {}; }
-}
-
-function persistNotes() {
-  localStorage.setItem('twse_notes', JSON.stringify(notes));
-}
+// notes 讀取整合在 load() 內，儲存整合在 save() 內
 
 function openNotesModal(code, name, price, change) {
   notesStock = { code, name, price, change };
@@ -1071,7 +1095,7 @@ function saveNote() {
   const text = document.getElementById('notesTextarea').value.trim();
   if (text) notes[notesStock.code] = text;
   else      delete notes[notesStock.code];
-  persistNotes();
+  save();
   closeNotesModal();
   render();
   toast('已儲存');
@@ -1235,10 +1259,11 @@ function removeForeignStock(symbol) {
 }
 
 // ── Init ───────────────────────────────────────────────────────────────────
-load();
-loadNotes();
-render();
-refreshAll();
+(async () => {
+  await load();
+  render();
+  refreshAll();
+})();
 </script>
 </body>
 </html>

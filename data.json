@@ -1,0 +1,945 @@
+{
+  "sectors": [
+    {
+      "id": "mm7j6if4cfa",
+      "name": "ABF 載板",
+      "stocks": [
+        {
+          "code": "3037",
+          "name": "欣興",
+          "market": "tse",
+          "change": 5.0163576881134135,
+          "price": 481.5
+        },
+        {
+          "code": "8046",
+          "name": "南電",
+          "market": "tse",
+          "change": 0.3616636528028933,
+          "price": 555
+        },
+        {
+          "code": "3189",
+          "name": "景碩",
+          "market": "tse",
+          "change": -3.3794162826420893,
+          "price": 314.5
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7j6if4hal",
+      "name": "被動元件",
+      "stocks": [
+        {
+          "code": "2327",
+          "name": "國巨*",
+          "market": "tse",
+          "change": -0.6666666666666667,
+          "price": 298
+        },
+        {
+          "code": "2492",
+          "name": "華新科",
+          "market": "tse",
+          "change": 0,
+          "price": 156
+        },
+        {
+          "code": "6862",
+          "name": "三集瑞-KY",
+          "market": "tse",
+          "change": 7.317073170731707,
+          "price": 220
+        },
+        {
+          "code": "3026",
+          "name": "禾伸堂",
+          "market": "tse",
+          "change": -0.8333333333333334,
+          "price": 119
+        },
+        {
+          "code": "2478",
+          "name": "大毅",
+          "market": "tse",
+          "change": 0.8310249307479145,
+          "price": 72.8
+        },
+        {
+          "code": "2472",
+          "name": "立隆電",
+          "market": "tse",
+          "change": 3.6734693877551026,
+          "price": 127
+        },
+        {
+          "code": "6224",
+          "name": "聚鼎",
+          "market": "tse",
+          "change": 1.738122827346466,
+          "price": 43.9
+        },
+        {
+          "code": "3357",
+          "name": "臺慶科",
+          "market": "otc",
+          "change": 9.880239520958083,
+          "price": 183.5
+        },
+        {
+          "code": "6173",
+          "name": "信昌電",
+          "market": "otc",
+          "change": 0.8185538881309802,
+          "price": 73.9
+        },
+        {
+          "code": "8043",
+          "name": "蜜望實",
+          "market": "otc",
+          "change": -0.6345177664974619,
+          "price": 78.3
+        },
+        {
+          "code": "6155",
+          "name": "鈞寶",
+          "market": "tse",
+          "change": 5.544554455445539
+        }
+      ],
+      "foreignStocks": [
+        {
+          "symbol": "6762.T",
+          "name": "TDK CORP",
+          "market": "JP",
+          "price": 2424.5,
+          "change": 0.0619
+        },
+        {
+          "symbol": "6981.T",
+          "name": "MURATA MANUFACTURING CO",
+          "market": "JP",
+          "price": 4108,
+          "change": 0.3665
+        },
+        {
+          "symbol": "6976.T",
+          "name": "TAIYO YUDEN CO LTD",
+          "market": "JP",
+          "price": 4796,
+          "change": -1.8018
+        }
+      ]
+    },
+    {
+      "id": "mm7j6if4smq",
+      "name": "廠務",
+      "stocks": [
+        {
+          "code": "2404",
+          "name": "漢唐",
+          "market": "tse",
+          "change": 9.178743961352657,
+          "price": 1130
+        },
+        {
+          "code": "6139",
+          "name": "亞翔",
+          "market": "tse",
+          "change": 5.026929982046679,
+          "price": 585
+        },
+        {
+          "code": "6691",
+          "name": "洋基工程",
+          "market": "tse",
+          "change": 9.98389694041868,
+          "price": 683
+        },
+        {
+          "code": "6196",
+          "name": "帆宣",
+          "market": "tse",
+          "change": 4.4520547945205475,
+          "price": 305
+        },
+        {
+          "code": "6944",
+          "name": "兆聯實業",
+          "market": "tse",
+          "change": 5.21978021978022,
+          "price": 766
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7j6if46xr",
+      "name": "光通訊",
+      "stocks": [
+        {
+          "code": "3234",
+          "name": "光環",
+          "market": "otc",
+          "change": 2.56410256410257,
+          "price": 96
+        },
+        {
+          "code": "4971",
+          "name": "IET-KY",
+          "market": "otc",
+          "change": 8.88888888888889,
+          "price": 490
+        },
+        {
+          "code": "3081",
+          "name": "聯亞",
+          "market": "otc",
+          "change": -1.185770750988142,
+          "price": 1250
+        },
+        {
+          "code": "4979",
+          "name": "華星光",
+          "market": "otc",
+          "change": 4.074074074074074,
+          "price": 421.5
+        },
+        {
+          "code": "3163",
+          "name": "波若威",
+          "market": "otc",
+          "change": -0.7672634271099744,
+          "price": 776
+        },
+        {
+          "code": "6442",
+          "name": "光聖",
+          "market": "tse",
+          "change": 3.125,
+          "price": 2145
+        },
+        {
+          "code": "2455",
+          "name": "全新",
+          "market": "tse",
+          "change": 9.848484848484848,
+          "price": 217.5
+        },
+        {
+          "code": "4991",
+          "name": "環宇-KY",
+          "market": "otc",
+          "change": 6.481481481481481,
+          "price": 345
+        },
+        {
+          "code": "3363",
+          "name": "上詮",
+          "market": "otc",
+          "change": 1.1764705882352942,
+          "price": 602
+        },
+        {
+          "code": "3450",
+          "name": "聯鈞",
+          "market": "tse",
+          "change": 9.946714031971581,
+          "price": 309.5
+        },
+        {
+          "code": "3105",
+          "name": "穩懋",
+          "market": "otc",
+          "change": 4.968944099378882
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7j6if4xlj",
+      "name": "低軌衛星",
+      "stocks": [
+        {
+          "code": "2313",
+          "name": "華通",
+          "market": "tse",
+          "change": -2.386634844868735,
+          "price": 204.5
+        },
+        {
+          "code": "6285",
+          "name": "啟碁",
+          "market": "tse",
+          "change": -1.5789473684210527,
+          "price": 187
+        },
+        {
+          "code": "2367",
+          "name": "燿華",
+          "market": "tse",
+          "change": 9.880749574105616,
+          "price": 64.5
+        },
+        {
+          "code": "3491",
+          "name": "昇達科",
+          "market": "otc",
+          "change": 5.263157894736842,
+          "price": 1600
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7j6if4ifz",
+      "name": "探針卡",
+      "stocks": [
+        {
+          "code": "6510",
+          "name": "精測",
+          "market": "otc",
+          "change": -4.21455938697318,
+          "price": 3750
+        },
+        {
+          "code": "6217",
+          "name": "中探針",
+          "market": "otc",
+          "change": 9.976525821596244,
+          "price": 93.7
+        },
+        {
+          "code": "6223",
+          "name": "旺矽",
+          "market": "otc",
+          "change": 9.888059701492537,
+          "price": 2945
+        },
+        {
+          "code": "6515",
+          "name": "穎崴",
+          "market": "tse",
+          "change": 2.3,
+          "price": 5115
+        },
+        {
+          "code": "6683",
+          "name": "雍智科技",
+          "market": "otc",
+          "change": 9.580838323353294,
+          "price": 915
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7je2akhqs",
+      "name": "記憶體",
+      "stocks": [
+        {
+          "code": "2344",
+          "name": "華邦電",
+          "market": "tse",
+          "change": 3.8135593220338984,
+          "price": 122.5
+        },
+        {
+          "code": "2337",
+          "name": "旺宏",
+          "market": "tse",
+          "change": 1.8518518518518516,
+          "price": 110
+        },
+        {
+          "code": "2408",
+          "name": "南亞科",
+          "market": "tse",
+          "change": -0.8680555555555556,
+          "price": 285.5
+        },
+        {
+          "code": "8299",
+          "name": "群聯",
+          "market": "otc",
+          "change": -1.8181818181818181,
+          "price": 1890
+        },
+        {
+          "code": "3006",
+          "name": "晶豪科",
+          "market": "tse",
+          "change": -1.5723270440251573,
+          "price": 156.5
+        },
+        {
+          "code": "6770",
+          "name": "力積電",
+          "market": "tse",
+          "change": -0.13020833333332593
+        }
+      ],
+      "foreignStocks": [
+        {
+          "symbol": "285A.T",
+          "name": "KIOXIA HOLDINGS CORPORATION",
+          "market": "JP",
+          "price": 21210,
+          "change": 0.118
+        },
+        {
+          "symbol": "MU",
+          "name": "Micron Technology, Inc.",
+          "market": "US",
+          "price": 412.37,
+          "change": 0.1506
+        },
+        {
+          "symbol": "SNDK",
+          "name": "Sandisk Corporation",
+          "market": "US",
+          "price": 635.36,
+          "change": -1.4487
+        },
+        {
+          "symbol": "STX",
+          "name": "Seagate Technology Holdings PLC",
+          "market": "US",
+          "price": 407.84,
+          "change": 0.231
+        },
+        {
+          "symbol": "000660.KS",
+          "name": "SK hynix",
+          "market": "KR",
+          "price": 1061000,
+          "change": -3.4577
+        },
+        {
+          "symbol": "005930.KS",
+          "name": "SamsungElec",
+          "market": "KR",
+          "price": 216500,
+          "change": -0.6881
+        }
+      ]
+    },
+    {
+      "id": "mm7jec63csc",
+      "name": "散熱",
+      "stocks": [
+        {
+          "code": "3017",
+          "name": "奇鋐",
+          "market": "tse",
+          "change": 5.3731343283582085,
+          "price": 1765
+        },
+        {
+          "code": "3324",
+          "name": "雙鴻",
+          "market": "otc",
+          "change": 0,
+          "price": 1155
+        },
+        {
+          "code": "3653",
+          "name": "健策",
+          "market": "tse",
+          "change": -0.3194888178913738,
+          "price": 3120
+        },
+        {
+          "code": "8996",
+          "name": "高力",
+          "market": "tse",
+          "change": -3.512623490669594,
+          "price": 879
+        }
+      ],
+      "foreignStocks": [
+        {
+          "symbol": "VRT",
+          "name": "Vertiv Holdings, LLC",
+          "market": "US",
+          "price": 254.89,
+          "change": -0.6655
+        }
+      ]
+    },
+    {
+      "id": "mm7jf0b35ug",
+      "name": "CCL",
+      "stocks": [
+        {
+          "code": "6274",
+          "name": "台燿",
+          "market": "otc",
+          "change": -5.545927209705372,
+          "price": 545
+        },
+        {
+          "code": "2383",
+          "name": "台光電",
+          "market": "tse",
+          "change": 0.8264462809917356,
+          "price": 2440
+        },
+        {
+          "code": "6213",
+          "name": "聯茂",
+          "market": "tse",
+          "change": -3.4129692832764507,
+          "price": 141.5
+        },
+        {
+          "code": "1303",
+          "name": "南亞",
+          "market": "tse",
+          "change": -3.2665964172813573,
+          "price": 91.8
+        },
+        {
+          "code": "2368",
+          "name": "金像電",
+          "market": "tse",
+          "change": -2.2485207100591715,
+          "price": 826
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7jf3bp8lm",
+      "name": "玻纖布",
+      "stocks": [
+        {
+          "code": "1802",
+          "name": "台玻",
+          "market": "tse",
+          "change": -0.3262642740619833,
+          "price": 61.1
+        },
+        {
+          "code": "1815",
+          "name": "富喬",
+          "market": "otc",
+          "change": -2.2123893805309733,
+          "price": 110.5
+        },
+        {
+          "code": "5475",
+          "name": "德宏",
+          "market": "otc",
+          "change": -1.6203703703703702,
+          "price": 212.5
+        },
+        {
+          "code": "1303",
+          "name": "南亞",
+          "market": "tse",
+          "change": -3.2665964172813573,
+          "price": 91.8
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7jfcyj7ey",
+      "name": "PCB",
+      "stocks": [
+        {
+          "code": "4958",
+          "name": "臻鼎-KY",
+          "market": "tse",
+          "change": 1.70316301703163,
+          "price": 209
+        },
+        {
+          "code": "2313",
+          "name": "華通",
+          "market": "tse",
+          "change": -2.386634844868735,
+          "price": 204.5
+        },
+        {
+          "code": "2316",
+          "name": "楠梓電",
+          "market": "tse",
+          "change": 9.75609756097561
+        },
+        {
+          "code": "3715",
+          "name": "定穎投控",
+          "market": "tse",
+          "change": 3.2679738562091507
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7ru6yf68i",
+      "name": "銅箔",
+      "stocks": [
+        {
+          "code": "8358",
+          "name": "金居",
+          "market": "otc",
+          "change": -0.684931506849315,
+          "price": 290
+        }
+      ],
+      "foreignStocks": [
+        {
+          "symbol": "5706.T",
+          "name": "MITSUI KINZOKU CO LTD",
+          "market": "JP",
+          "price": 36910,
+          "change": 1.6524
+        },
+        {
+          "symbol": "5801.T",
+          "name": "FURUKAWA ELECTRIC CO",
+          "market": "JP",
+          "price": 28100,
+          "change": 0.5727
+        }
+      ]
+    },
+    {
+      "id": "mm7s6hy7214",
+      "name": "原料",
+      "stocks": [
+        {
+          "code": "7610",
+          "name": "聯友金屬-創",
+          "market": "tse",
+          "change": 7.920792079207921,
+          "price": 327
+        },
+        {
+          "code": "1717",
+          "name": "長興",
+          "market": "tse",
+          "change": 9.872611464968157
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7s6kf4844",
+      "name": "耗材",
+      "stocks": [
+        {
+          "code": "8074",
+          "name": "鉅橡",
+          "market": "otc",
+          "change": 4.029850746268661,
+          "price": 69.7
+        },
+        {
+          "code": "8021",
+          "name": "尖點",
+          "market": "tse",
+          "change": -3.213610586011342
+        },
+        {
+          "code": "3680",
+          "name": "家登",
+          "market": "otc",
+          "change": 0.5910165484633569
+        },
+        {
+          "code": "1560",
+          "name": "中砂",
+          "market": "tse",
+          "change": 5.96562184024267
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7syuzfme4",
+      "name": "電源",
+      "stocks": [
+        {
+          "code": "2308",
+          "name": "台達電",
+          "market": "tse",
+          "change": -0.34843205574912894,
+          "price": 1430
+        },
+        {
+          "code": "2301",
+          "name": "光寶科",
+          "market": "tse",
+          "change": -9.895833333333332,
+          "price": 173
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7tj1kdl4b",
+      "name": "設備",
+      "stocks": [
+        {
+          "code": "6187",
+          "name": "萬潤",
+          "market": "otc",
+          "change": 9.839357429718875,
+          "price": 547
+        },
+        {
+          "code": "3583",
+          "name": "辛耘",
+          "market": "tse",
+          "change": 3.0555555555555554,
+          "price": 371
+        },
+        {
+          "code": "3131",
+          "name": "弘塑",
+          "market": "otc",
+          "change": 7.878787878787878,
+          "price": 1780
+        },
+        {
+          "code": "6640",
+          "name": "均華",
+          "market": "otc",
+          "change": 1.639344262295082,
+          "price": 806
+        },
+        {
+          "code": "3030",
+          "name": "德律",
+          "market": "tse",
+          "change": 9.828009828009828,
+          "price": 223.5
+        },
+        {
+          "code": "2360",
+          "name": "致茂",
+          "market": "tse",
+          "change": 9.9601593625498
+        },
+        {
+          "code": "4577",
+          "name": "達航科技",
+          "market": "otc",
+          "change": 9.78398983481576
+        },
+        {
+          "code": "2467",
+          "name": "志聖",
+          "market": "tse",
+          "change": 9.931506849315069
+        },
+        {
+          "code": "7769",
+          "name": "鴻勁",
+          "market": "tse",
+          "change": 0.9345794392523363
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7tpbtke5x",
+      "name": "成熟製程",
+      "stocks": [
+        {
+          "code": "2303",
+          "name": "聯電",
+          "market": "tse",
+          "change": -0.15267175572518216,
+          "price": 65.4
+        },
+        {
+          "code": "5347",
+          "name": "世界",
+          "market": "otc",
+          "change": -1.1111111111111112,
+          "price": 133.5
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7tr7tz9p3",
+      "name": "封測",
+      "stocks": [
+        {
+          "code": "3711",
+          "name": "日月光投控",
+          "market": "tse",
+          "change": -0.3856041131105398,
+          "price": 387.5
+        },
+        {
+          "code": "2449",
+          "name": "京元電子",
+          "market": "tse",
+          "change": 2.1875,
+          "price": 327
+        },
+        {
+          "code": "6239",
+          "name": "力成",
+          "market": "tse",
+          "change": 0,
+          "price": 258
+        },
+        {
+          "code": "8150",
+          "name": "南茂",
+          "market": "tse",
+          "change": 10,
+          "price": 71.5
+        },
+        {
+          "code": "3264",
+          "name": "欣銓",
+          "market": "otc",
+          "change": 0.9615384615384616,
+          "price": 157.5
+        },
+        {
+          "code": "6510",
+          "name": "精測",
+          "market": "otc",
+          "change": -4.21455938697318,
+          "price": 3750
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7ujfnh1lx",
+      "name": "IC 設計",
+      "stocks": [
+        {
+          "code": "2454",
+          "name": "聯發科",
+          "market": "tse",
+          "change": 4.010695187165775,
+          "price": 1945
+        },
+        {
+          "code": "2379",
+          "name": "瑞昱",
+          "market": "tse",
+          "change": 1.4752370916754478,
+          "price": 481.5
+        },
+        {
+          "code": "3034",
+          "name": "聯詠",
+          "market": "tse",
+          "change": 1.550387596899225,
+          "price": 393
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7ulxgixmg",
+      "name": "設計服務",
+      "stocks": [
+        {
+          "code": "3443",
+          "name": "創意",
+          "market": "tse",
+          "change": 7.572815533980583,
+          "price": 2770
+        },
+        {
+          "code": "3661",
+          "name": "世芯-KY",
+          "market": "tse",
+          "change": 0.28735632183908044,
+          "price": 3490
+        },
+        {
+          "code": "3035",
+          "name": "智原",
+          "market": "tse",
+          "change": 0.2985074626865672
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7umkjtqj0",
+      "name": "重電",
+      "stocks": [
+        {
+          "code": "1513",
+          "name": "中興電",
+          "market": "tse",
+          "change": 2.932551319648094,
+          "price": 175.5
+        },
+        {
+          "code": "1519",
+          "name": "華城",
+          "market": "tse",
+          "change": 1.9047619047619049,
+          "price": 1070
+        },
+        {
+          "code": "1503",
+          "name": "士電",
+          "market": "tse",
+          "change": 3.7362637362637363,
+          "price": 236
+        },
+        {
+          "code": "1514",
+          "name": "亞力",
+          "market": "tse",
+          "change": -1.9157088122605364,
+          "price": 128
+        }
+      ],
+      "foreignStocks": []
+    },
+    {
+      "id": "mm7va8yrxl4",
+      "name": "太陽能",
+      "stocks": [
+        {
+          "code": "6443",
+          "name": "元晶",
+          "market": "tse",
+          "change": 10.000000000000004
+        },
+        {
+          "code": "3576",
+          "name": "聯合再生",
+          "market": "tse",
+          "change": 9.950248756218905
+        },
+        {
+          "code": "6244",
+          "name": "茂迪",
+          "market": "otc",
+          "change": 0
+        },
+        {
+          "code": "4768",
+          "name": "晶呈科技",
+          "market": "otc",
+          "change": 9.929078014184398
+        }
+      ],
+      "foreignStocks": []
+    }
+  ],
+  "notes": {
+    "2327": "MLCC"
+  }
+}

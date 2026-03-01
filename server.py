@@ -1,14 +1,35 @@
 import os
+import json
 import yfinance as yf
 from flask import Flask, jsonify, request, send_from_directory
 
 app = Flask(__name__)
-BASE = os.path.dirname(os.path.abspath(__file__))
+BASE      = os.path.dirname(os.path.abspath(__file__))
+DATA_FILE = os.path.join(BASE, 'data.json')
 
 
 @app.route('/')
 def index():
     return send_from_directory(BASE, 'index.html')
+
+
+@app.route('/api/state', methods=['GET'])
+def get_state():
+    """讀取所有資料（sectors + notes）"""
+    try:
+        with open(DATA_FILE, encoding='utf-8') as f:
+            return f.read(), 200, {'Content-Type': 'application/json'}
+    except FileNotFoundError:
+        return jsonify({'sectors': [], 'notes': {}})
+
+
+@app.route('/api/state', methods=['POST'])
+def save_state():
+    """儲存所有資料到 data.json"""
+    data = request.get_json()
+    with open(DATA_FILE, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    return '', 204
 
 
 @app.route('/api/quote')
