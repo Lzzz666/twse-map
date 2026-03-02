@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>台股板塊圖</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -13,6 +14,84 @@
       color: #1a1a1a;
       min-height: 100vh;
     }
+
+    /* ── Login Screen ── */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f4f4f6;
+    }
+    .login-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e4e4e7;
+      padding: 36px 40px 32px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .login-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .login-sub {
+      font-size: 13px;
+      color: #71717a;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .google-btn {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #d4d4d8;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.12s, border-color 0.12s;
+      color: #1a1a1a;
+    }
+    .google-btn:hover { background: #f4f4f6; border-color: #a1a1aa; }
+
+    /* ── User info in header ── */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 4px;
+      padding-left: 12px;
+      border-left: 1px solid #e4e4e7;
+    }
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #18181b;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .user-email {
+      font-size: 12px;
+      color: #71717a;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @media (max-width: 600px) { .user-email { display: none; } }
 
     /* ── Header ── */
     header {
@@ -324,9 +403,221 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+
+    /* ── Foreign stocks modal ── */
+    .foreign-modal {
+      width: 460px;
+      max-width: 95vw;
+      padding: 0;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      background: #fff;
+    }
+
+    .foreign-modal-hdr {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #f4f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .foreign-modal-title {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .foreign-modal-sub {
+      font-size: 12px;
+      color: #a1a1aa;
+      margin-left: 6px;
+    }
+
+    .foreign-stock-list {
+      overflow-y: auto;
+      flex: 1;
+      padding: 4px 0;
+      min-height: 50px;
+    }
+
+    .foreign-empty {
+      padding: 14px 16px;
+      font-size: 12px;
+      color: #a1a1aa;
+    }
+
+    .foreign-stock-row {
+      display: flex;
+      align-items: center;
+      padding: 7px 16px;
+      gap: 8px;
+      transition: background 0.1s;
+    }
+    .foreign-stock-row:hover { background: #fafafa; }
+
+    .market-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+      flex-shrink: 0;
+      letter-spacing: 0.3px;
+      width: 24px;
+      text-align: center;
+    }
+    .market-us { background: #eff6ff; color: #3b82f6; }
+    .market-jp { background: #fff7ed; color: #ea580c; }
+    .market-kr { background: #fdf4ff; color: #9333ea; }
+
+    .foreign-symbol {
+      font-size: 12px;
+      font-weight: 600;
+      color: #71717a;
+      width: 76px;
+      flex-shrink: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .foreign-name {
+      font-size: 13px;
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .foreign-price {
+      font-size: 13px;
+      min-width: 64px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .foreign-change {
+      font-size: 13px;
+      font-weight: 600;
+      min-width: 58px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .foreign-add-row {
+      display: flex;
+      padding: 10px 16px 14px;
+      border-top: 1px solid #f4f4f6;
+      flex-shrink: 0;
+    }
+
+    .foreign-hint {
+      padding: 0 16px 10px;
+      font-size: 11px;
+      color: #a1a1aa;
+      flex-shrink: 0;
+    }
+
+    /* Globe button on card header */
+    .globe-btn { color: #a1a1aa; }
+    .globe-btn:hover { color: #3b82f6; background: #eff6ff; }
+
+    /* ── Notes dot indicator ── */
+    .note-dot {
+      display: inline-block;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #3b82f6;
+      vertical-align: middle;
+      margin-left: 4px;
+      flex-shrink: 0;
+    }
+
+    /* ── Notes modal ── */
+    .notes-modal {
+      width: 380px;
+      max-width: 95vw;
+      padding: 0;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .notes-modal-hdr {
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid #f4f4f6;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .notes-title-row {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+
+    .notes-code  { font-size: 12px; font-weight: 600; color: #71717a; }
+    .notes-name  { font-size: 15px; font-weight: 600; }
+    .notes-quote { font-size: 13px; font-weight: 600; }
+
+    .notes-textarea {
+      width: 100%;
+      border: none;
+      resize: none;
+      outline: none;
+      font-size: 13px;
+      line-height: 1.7;
+      padding: 14px 16px;
+      min-height: 150px;
+      font-family: inherit;
+      color: #1a1a1a;
+      background: #fff;
+    }
+    .notes-textarea::placeholder { color: #d4d4d8; }
+
+    .notes-modal-footer {
+      padding: 8px 16px 14px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      border-top: 1px solid #f4f4f6;
+    }
+
+    .stock-row    { cursor: pointer; }
+    .foreign-stock-row { cursor: pointer; }
   </style>
 </head>
 <body>
+
+<!-- ── Login Screen ── -->
+<div id="loginScreen" class="login-screen" style="display:none">
+  <div class="login-card">
+    <div class="login-title">台股板塊圖</div>
+    <div class="login-sub">請登入以使用<br>你的個人板塊設定</div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+        <path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      使用 Google 登入
+    </button>
+  </div>
+</div>
+
+<!-- ── App Content ── -->
+<div id="appContent" style="display:none">
 
 <header>
   <h1>台股板塊圖</h1>
@@ -339,6 +630,11 @@
       匯入
       <input type="file" accept=".json" style="display:none" onchange="importJSON(event)">
     </label>
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar"></div>
+      <span class="user-email" id="userEmail"></span>
+      <button class="btn" onclick="signOut()">登出</button>
+    </div>
   </div>
 </header>
 
@@ -353,6 +649,9 @@
   </div>
 </main>
 
+</div><!-- end #appContent -->
+
+<!-- ── Modals（放在 appContent 外，避免被 display:none 影響）── -->
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
   <div class="modal">
     <h3 id="modalTitle">新增板塊</h3>
@@ -365,9 +664,125 @@
   </div>
 </div>
 
+<div class="overlay" id="notesOverlay" onclick="notesOverlayClick(event)">
+  <div class="notes-modal">
+    <div class="notes-modal-hdr">
+      <div class="notes-title-row">
+        <span class="notes-code" id="notesCode"></span>
+        <span class="notes-name" id="notesName"></span>
+        <span class="notes-quote" id="notesQuote"></span>
+      </div>
+      <button class="icon-btn" title="關閉" onclick="closeNotesModal()" style="font-size:15px;color:#71717a;flex-shrink:0">✕</button>
+    </div>
+    <textarea class="notes-textarea" id="notesTextarea"
+      placeholder="記錄觀察、想法、進出場邏輯…"
+      onkeydown="if(event.key==='Escape')closeNotesModal()"></textarea>
+    <div class="notes-modal-footer">
+      <button class="btn" onclick="closeNotesModal()">取消</button>
+      <button class="btn btn-primary" onclick="saveNote()">儲存</button>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="foreignOverlay" onclick="foreignOverlayClick(event)">
+  <div class="foreign-modal">
+    <div class="foreign-modal-hdr">
+      <div>
+        <span class="foreign-modal-title" id="foreignModalTitle"></span>
+        <span class="foreign-modal-sub">關聯外股</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="btn" id="foreignRefreshBtn" onclick="refreshForeignStocks()" style="padding:4px 10px;font-size:12px">↻ 更新</button>
+        <button class="icon-btn" title="關閉" onclick="closeForeignModal()" style="font-size:15px;color:#71717a">✕</button>
+      </div>
+    </div>
+    <div id="foreignStockList" class="foreign-stock-list"></div>
+    <div class="foreign-hint">美股直接輸入代號（NVDA）・日股加 .T（6758.T）・韓股加 .KS（005930.KS）</div>
+    <div class="foreign-add-row">
+      <input id="foreignAddInput" class="add-stock-input" type="text"
+        placeholder="NVDA・6758.T・005930.KS"
+        style="border-radius:6px 0 0 6px"
+        onkeydown="if(event.key==='Enter')addForeignStock(this)">
+      <button class="add-stock-btn" onclick="addForeignStock(document.getElementById('foreignAddInput'))"
+        style="border-radius:0 6px 6px 0">+</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
+// ── Auth ───────────────────────────────────────────────────────────────────
+let supabaseClient = null;
+
+async function initAuth() {
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    supabaseClient = window.supabase.createClient(cfg.supabase_url, cfg.supabase_anon_key);
+  } catch {
+    toast('設定載入失敗，請重新整理');
+    return;
+  }
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    await _onSignIn(session);
+  } else {
+    _showLogin();
+  }
+
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      await _onSignIn(session);
+    } else if (event === 'SIGNED_OUT') {
+      _showLogin();
+    }
+  });
+}
+
+function _showLogin() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appContent').style.display  = 'none';
+}
+
+async function _onSignIn(session) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appContent').style.display  = '';
+
+  const email = session.user.email || '';
+  document.getElementById('userEmail').textContent = email;
+  document.getElementById('userAvatar').textContent = (email[0] || '?').toUpperCase();
+
+  await load();
+  render();
+  refreshAll();
+}
+
+async function signInWithGoogle() {
+  await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
+  });
+}
+
+async function signOut() {
+  sectors = [];
+  notes   = {};
+  render();
+  await supabaseClient.auth.signOut();
+}
+
+async function authFetch(url, options = {}) {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      ...(options.headers || {}),
+    },
+  });
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
@@ -395,11 +810,10 @@ function avg(stocks) {
 const MIS_API    = 'https://mis.twse.com.tw/stock/api/getStockInfo.jsp';
 const CORS_PROXY = 'https://corsproxy.io/?url=';
 
-// Parse one msgArray item → { name, market, change } or null
 function parseItem(item) {
   const price = parseFloat(item.z);
   const prev  = parseFloat(item.y);
-  const pz    = parseFloat(item.pz);           // last traded price (fallback)
+  const pz    = parseFloat(item.pz);
   const cur   = price > 0 ? price : (pz > 0 ? pz : null);
   return {
     name:   (item.n || '').trim(),
@@ -409,9 +823,7 @@ function parseItem(item) {
   };
 }
 
-// Query TWSE MIS API; returns Map<code, {name,market,change}>
 async function queryMIS(stocks) {
-  // 永遠兩個都查，讓 API 回傳有效的那個，避免 market 設錯漏抓
   const codes = [...new Set(stocks.map(st => st.code))];
   const parts = codes.flatMap(code => [`tse_${code}.tw`, `otc_${code}.tw`]);
   const rawUrl = `${MIS_API}?ex_ch=${parts.join('|')}&json=1&delay=0`;
@@ -433,7 +845,8 @@ const DEFAULT = [
       { code: '2049', name: '上銓',   market: 'tse', change: 0 },
       { code: '3037', name: '欣銓',   market: 'tse', change: 0 },
       { code: '5347', name: '世界',   market: 'tse', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '被動元件',
@@ -441,7 +854,8 @@ const DEFAULT = [
       { code: '2327', name: '國巨',   market: 'tse', change: 0 },
       { code: '2492', name: '華新科', market: 'tse', change: 0 },
       { code: '2330', name: '台積電', market: 'tse', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '廠務',
@@ -449,7 +863,8 @@ const DEFAULT = [
       { code: '1590', name: '亞德客', market: 'tse', change: 0 },
       { code: '2404', name: '漢唐',   market: 'tse', change: 0 },
       { code: '6552', name: '易華電', market: 'tse', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '光通訊',
@@ -457,7 +872,8 @@ const DEFAULT = [
       { code: '3234', name: '光環',   market: 'otc', change: 0 },
       { code: '3491', name: '昇達科', market: 'otc', change: 0 },
       { code: '6782', name: '視達',   market: 'otc', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '低軌衛星',
@@ -465,7 +881,8 @@ const DEFAULT = [
       { code: '3045', name: '台灣大', market: 'tse', change: 0 },
       { code: '3611', name: '鑫創',   market: 'otc', change: 0 },
       { code: '3629', name: '群電',   market: 'otc', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
   {
     id: uid(), name: '探針卡',
@@ -473,16 +890,17 @@ const DEFAULT = [
       { code: '6510', name: '精測',   market: 'otc', change: 0 },
       { code: '5225', name: '泰鼎',   market: 'otc', change: 0 },
       { code: '6598', name: '德律',   market: 'tse', change: 0 },
-    ]
+    ],
+    foreignStocks: []
   },
 ];
 
 // ── State ──────────────────────────────────────────────────────────────────
 let sectors    = [];
 let editMode   = false;
-let modalMode  = null;   // 'add' | 'rename'
+let modalMode  = null;
 let renameId   = null;
-const sortStates = {};   // sectorId -> undefined | 'desc' | 'asc'
+const sortStates = {};
 
 function cycleSortState(id) {
   const cur = sortStates[id];
@@ -491,24 +909,34 @@ function cycleSortState(id) {
 }
 
 // ── Persistence ────────────────────────────────────────────────────────────
-function load() {
+async function load() {
   try {
-    const raw = localStorage.getItem('twse_sectors');
-    sectors = raw ? JSON.parse(raw) : DEFAULT;
-  } catch { sectors = DEFAULT; }
+    const res  = await authFetch('/api/state');
+    const data = await res.json();
+    sectors = data.sectors?.length ? data.sectors : DEFAULT;
+    notes   = data.notes  || {};
+    sectors.forEach(s => { if (!s.foreignStocks) s.foreignStocks = []; });
+  } catch { sectors = DEFAULT; notes = {}; }
 }
+
+let _saveTimer;
 function save() {
-  localStorage.setItem('twse_sectors', JSON.stringify(sectors));
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(_persist, 300);
+}
+function _persist() {
+  return authFetch('/api/state', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body:    JSON.stringify({ sectors, notes }),
+  }).catch(console.error);
 }
 
 // ── Render ─────────────────────────────────────────────────────────────────
 function render() {
-  const grid     = document.getElementById('grid');
-  const addCard  = grid.querySelector('.add-sector-card');
-
-  // Remove old cards
+  const grid    = document.getElementById('grid');
+  const addCard = grid.querySelector('.add-sector-card');
   grid.querySelectorAll('.sector-card').forEach(c => c.remove());
-
   sectors.forEach(s => grid.insertBefore(buildCard(s), addCard));
 }
 
@@ -516,7 +944,6 @@ function buildCard(sector) {
   const avgVal   = avg(sector.stocks);
   const sortMode = sortStates[sector.id];
 
-  // Sort display copy (never mutates stored order)
   let stocks = [...sector.stocks];
   if (sortMode === 'desc') stocks.sort((a, b) => (b.change ?? 0) - (a.change ?? 0));
   if (sortMode === 'asc')  stocks.sort((a, b) => (a.change ?? 0) - (b.change ?? 0));
@@ -525,12 +952,10 @@ function buildCard(sector) {
   card.className = 'sector-card';
   card.dataset.id = sector.id;
 
-  // Sort button icon & class
   const sortIcon  = sortMode === 'desc' ? '↓' : sortMode === 'asc' ? '↑' : '⇅';
   const sortCls   = sortMode === 'desc' ? 'sort-desc' : sortMode === 'asc' ? 'sort-asc' : '';
   const sortTitle = sortMode === 'desc' ? '漲跌高→低' : sortMode === 'asc' ? '漲跌低→高' : '依漲跌排序';
 
-  // Header
   const hdr = document.createElement('div');
   hdr.className = 'card-header';
   hdr.innerHTML = `
@@ -539,6 +964,13 @@ function buildCard(sector) {
       <span class="sector-badge ${badgeClass(avgVal)}">${fmtPct(avgVal)}</span>
     </div>
     <div style="display:flex;align-items:center;gap:2px">
+      <button class="icon-btn globe-btn" title="關聯外股" onclick="openForeignModal('${sector.id}')">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none">
+          <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.3"/>
+          <ellipse cx="7" cy="7" rx="2.6" ry="5.5" stroke="currentColor" stroke-width="1.3"/>
+          <line x1="1.5" y1="7" x2="12.5" y2="7" stroke="currentColor" stroke-width="1.3"/>
+        </svg>
+      </button>
       <button class="icon-btn sort-btn ${sortCls}" title="${sortTitle}" onclick="cycleSortState('${sector.id}')">${sortIcon}</button>
       <div class="card-edit-actions">
         <button class="icon-btn" title="改名" onclick="openRename('${sector.id}')">
@@ -555,7 +987,6 @@ function buildCard(sector) {
     </div>`;
   card.appendChild(hdr);
 
-  // Stock list
   const list = document.createElement('div');
   list.className = 'stock-list';
   if (stocks.length === 0) {
@@ -564,9 +995,13 @@ function buildCard(sector) {
     stocks.forEach(st => {
       const row = document.createElement('div');
       row.className = 'stock-row';
+      row.onclick = e => {
+        if (e.target.closest('.rm-btn')) return;
+        openNotesModal(st.code, st.name, st.price ?? null, st.change ?? null);
+      };
       row.innerHTML = `
         <span class="stock-code">${esc(st.code)}</span>
-        <span class="stock-name">${esc(st.name)}</span>
+        <span class="stock-name">${esc(st.name)}${notes[st.code] ? '<span class="note-dot"></span>' : ''}</span>
         <span class="stock-price ${chgClass(st.change)}">${fmtPrice(st.price)}</span>
         <span class="stock-change ${chgClass(st.change)}">${fmtPct(st.change)}</span>
         <button class="rm-btn" title="移除" onclick="removeStock('${sector.id}','${esc(st.code)}')">×</button>`;
@@ -575,7 +1010,6 @@ function buildCard(sector) {
   }
   card.appendChild(list);
 
-  // Add stock row
   const addRow = document.createElement('div');
   addRow.className = 'add-stock-row';
   addRow.innerHTML = `
@@ -632,7 +1066,7 @@ function confirmModal() {
   const name = document.getElementById('modalInput').value.trim();
   if (!name) return;
   if (modalMode === 'add') {
-    sectors.push({ id: uid(), name, stocks: [] });
+    sectors.push({ id: uid(), name, stocks: [], foreignStocks: [] });
     toast(`已新增「${name}」`);
   } else {
     const s = sectors.find(s => s.id === renameId);
@@ -658,7 +1092,6 @@ async function refreshAll() {
   btn.disabled = true;
   btn.textContent = '更新中…';
 
-  // Collect unique stocks across all sectors
   const seen = new Map();
   sectors.forEach(s => s.stocks.forEach(st => {
     if (!seen.has(st.code)) seen.set(st.code, st);
@@ -771,10 +1204,206 @@ function toast(msg) {
   _toastTimer = setTimeout(() => el.classList.remove('show'), 2200);
 }
 
+// ── Notes ──────────────────────────────────────────────────────────────────
+let notes      = {};
+let notesStock = null;
+
+function openNotesModal(code, name, price, change) {
+  notesStock = { code, name, price, change };
+  document.getElementById('notesCode').textContent = code;
+  document.getElementById('notesName').textContent = name;
+
+  const q = document.getElementById('notesQuote');
+  if (price != null) {
+    q.textContent = `${price}  ${change != null ? fmtPct(change) : ''}`.trim();
+    q.className   = 'notes-quote ' + chgClass(change ?? 0);
+  } else {
+    q.textContent = '';
+  }
+
+  document.getElementById('notesTextarea').value = notes[code] || '';
+  document.getElementById('notesOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('notesTextarea').focus(), 40);
+}
+
+function closeNotesModal() {
+  document.getElementById('notesOverlay').classList.remove('open');
+  notesStock = null;
+}
+
+function notesOverlayClick(e) {
+  if (e.target === e.currentTarget) closeNotesModal();
+}
+
+function saveNote() {
+  if (!notesStock) return;
+  const text = document.getElementById('notesTextarea').value.trim();
+  if (text) notes[notesStock.code] = text;
+  else      delete notes[notesStock.code];
+  save();
+  closeNotesModal();
+  render();
+  toast('已儲存');
+}
+
+// ── Foreign stocks ─────────────────────────────────────────────────────────
+let foreignModalSectorId = null;
+
+function detectMarket(symbol) {
+  if (symbol.endsWith('.T'))  return 'JP';
+  if (symbol.endsWith('.KS') || symbol.endsWith('.KQ')) return 'KR';
+  return 'US';
+}
+
+function fmtForeignPrice(price, market) {
+  if (price === null || price === undefined) return '–';
+  if (market === 'JP' || market === 'KR') return Math.round(price).toLocaleString();
+  return price.toFixed(2);
+}
+
+async function fetchForeignQuotes(symbols) {
+  if (!symbols.length) return new Map();
+  const res  = await fetch(`/api/quote?symbols=${symbols.join(',')}`);
+  const data = await res.json();
+  return new Map(Object.entries(data));
+}
+
+async function searchForeignSymbol(symbol) {
+  const res = await fetch(`/api/search?symbol=${encodeURIComponent(symbol)}`);
+  if (!res.ok) return null;
+  return await res.json();
+}
+
+function openForeignModal(sectorId) {
+  foreignModalSectorId = sectorId;
+  const s = sectors.find(s => s.id === sectorId);
+  if (!s) return;
+  document.getElementById('foreignModalTitle').textContent = s.name;
+  renderForeignModal();
+  document.getElementById('foreignOverlay').classList.add('open');
+  document.getElementById('foreignAddInput').value = '';
+  if (s.foreignStocks.length) refreshForeignStocks();
+}
+
+function closeForeignModal() {
+  document.getElementById('foreignOverlay').classList.remove('open');
+  foreignModalSectorId = null;
+}
+
+function foreignOverlayClick(e) {
+  if (e.target === e.currentTarget) closeForeignModal();
+}
+
+function renderForeignModal() {
+  const s    = sectors.find(s => s.id === foreignModalSectorId);
+  const list = document.getElementById('foreignStockList');
+  if (!s) { list.innerHTML = ''; return; }
+
+  if (!s.foreignStocks.length) {
+    list.innerHTML = `<div class="foreign-empty">尚未新增關聯外股</div>`;
+    return;
+  }
+
+  list.innerHTML = s.foreignStocks.map(st => {
+    const mktCls   = st.market === 'JP' ? 'market-jp' : st.market === 'KR' ? 'market-kr' : 'market-us';
+    const priceTxt = fmtForeignPrice(st.price, st.market);
+    const chgTxt   = st.change !== null && st.change !== undefined ? fmtPct(st.change) : '–';
+    const cls      = st.change !== null && st.change !== undefined ? chgClass(st.change) : 'chg-flat';
+    const dot      = notes[st.symbol] ? '<span class="note-dot"></span>' : '';
+    return `
+      <div class="foreign-stock-row" data-symbol="${esc(st.symbol)}">
+        <span class="market-badge ${mktCls}">${esc(st.market)}</span>
+        <span class="foreign-symbol">${esc(st.symbol)}</span>
+        <span class="foreign-name">${esc(st.name)}${dot}</span>
+        <span class="foreign-price ${cls}">${priceTxt}</span>
+        <span class="foreign-change ${cls}">${chgTxt}</span>
+        <button class="rm-btn" style="display:flex" title="移除" onclick="event.stopPropagation();removeForeignStock('${esc(st.symbol)}')">×</button>
+      </div>`;
+  }).join('');
+
+  list.querySelectorAll('.foreign-stock-row').forEach(row => {
+    row.onclick = e => {
+      if (e.target.closest('.rm-btn')) return;
+      const sym = row.dataset.symbol;
+      const st  = s.foreignStocks.find(t => t.symbol === sym);
+      if (st) openNotesModal(st.symbol, st.name, st.price ?? null, st.change ?? null);
+    };
+  });
+}
+
+async function refreshForeignStocks() {
+  const s = sectors.find(s => s.id === foreignModalSectorId);
+  if (!s || !s.foreignStocks.length) return;
+
+  const btn = document.getElementById('foreignRefreshBtn');
+  btn.disabled    = true;
+  btn.textContent = '…';
+
+  try {
+    const symbols = s.foreignStocks.map(st => st.symbol);
+    const lookup  = await fetchForeignQuotes(symbols);
+
+    s.foreignStocks.forEach(st => {
+      const info = lookup.get(st.symbol);
+      if (!info) return;
+      if (info.price  != null)  st.price  = info.price;
+      if (info.change != null)  st.change = info.change;
+    });
+
+    save();
+    renderForeignModal();
+    toast('外股已更新');
+  } catch {
+    toast('外股連線失敗，請稍後再試');
+  } finally {
+    btn.disabled    = false;
+    btn.textContent = '↻ 更新';
+  }
+}
+
+async function addForeignStock(input) {
+  const symbol = input.value.trim().toUpperCase();
+  if (!symbol) return;
+
+  const s = sectors.find(s => s.id === foreignModalSectorId);
+  if (!s) return;
+
+  if (s.foreignStocks.find(t => t.symbol === symbol)) {
+    toast('該代號已在列表中'); return;
+  }
+
+  input.disabled = true;
+  try {
+    const info = await searchForeignSymbol(symbol);
+    if (!info || info.error) {
+      toast(`找不到代號 ${symbol}，請確認格式`); return;
+    }
+    const market = detectMarket(symbol);
+    s.foreignStocks.push({ symbol, name: info.name, market, price: info.price, change: info.change });
+    input.value = '';
+    save();
+    renderForeignModal();
+    toast(`已新增 ${info.name}（${symbol}）`);
+  } catch {
+    toast('查詢失敗，請確認代號');
+  } finally {
+    input.disabled = false;
+    input.focus();
+  }
+}
+
+function removeForeignStock(symbol) {
+  const s = sectors.find(s => s.id === foreignModalSectorId);
+  if (!s) return;
+  s.foreignStocks = s.foreignStocks.filter(t => t.symbol !== symbol);
+  save();
+  renderForeignModal();
+}
+
 // ── Init ───────────────────────────────────────────────────────────────────
-load();
-render();
-refreshAll();
+(async () => {
+  await initAuth();
+})();
 </script>
 </body>
 </html>
