@@ -2,6 +2,14 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 PID_FILE="$DIR/.server.pid"
 
+# 載入環境變數
+if [ -f "$DIR/.env" ]; then
+  set -a; source "$DIR/.env"; set +a
+else
+  echo "⚠️  找不到 .env 檔，請參考 .env.example 建立"
+  exit 1
+fi
+
 if [ -f "$PID_FILE" ]; then
   pid=$(cat "$PID_FILE")
   if kill -0 "$pid" 2>/dev/null; then
@@ -12,7 +20,7 @@ if [ -f "$PID_FILE" ]; then
 fi
 
 # 確認依賴已安裝
-if ! /usr/bin/python3 -c "import yfinance, flask" 2>/dev/null; then
+if ! /usr/bin/python3 -c "import yfinance, flask, supabase" 2>/dev/null; then
   echo "安裝依賴套件..."
   /usr/bin/python3 -m pip install -r "$DIR/requirements.txt" -q
 fi

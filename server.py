@@ -1,11 +1,40 @@
 import os
-import json
+from functools import wraps
+
 import yfinance as yf
 from flask import Flask, jsonify, request, send_from_directory
+from supabase import create_client
 
 app = Flask(__name__)
-BASE      = os.path.dirname(os.path.abspath(__file__))
-DATA_FILE = os.path.join(BASE, 'data.json')
+BASE = os.path.dirname(os.path.abspath(__file__))
+
+SUPABASE_URL         = os.environ.get('SUPABASE_URL', '')
+SUPABASE_ANON_KEY    = os.environ.get('SUPABASE_ANON_KEY', '')
+SUPABASE_SERVICE_KEY = os.environ.get('SUPABASE_SERVICE_KEY', '')
+
+_supa = None
+
+
+def _get_supa():
+    global _supa
+    if _supa is None:
+        _supa = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
+    return _supa
+
+
+def require_auth(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        token = request.headers.get('Authorization', '').removeprefix('Bearer ').strip()
+        if not token:
+            return jsonify({'error': 'Unauthorized'}), 401
+        try:
+            user = _get_supa().auth.get_user(token)
+            request.user_id = user.user.id
+        except Exception:
+            return jsonify({'error': 'Unauthorized'}), 401
+        return f(*args, **kwargs)
+    return wrapper
 
 
 @app.route('/')
@@ -13,22 +42,43 @@ def index():
     return send_from_directory(BASE, 'index.html')
 
 
+@app.route('/api/config')
+def api_config():
+    """前端初始化 Supabase 用的公開設定（anon key 可公開）"""
+    return jsonify({
+        'supabase_url':      SUPABASE_URL,
+        'supabase_anon_key': SUPABASE_ANON_KEY,
+    })
+
+
 @app.route('/api/state', methods=['GET'])
+@require_auth
 def get_state():
-    """讀取所有資料（sectors + notes）"""
-    try:
-        with open(DATA_FILE, encoding='utf-8') as f:
-            return f.read(), 200, {'Content-Type': 'application/json'}
-    except FileNotFoundError:
-        return jsonify({'sectors': [], 'notes': {}})
+    row = (
+        _get_supa()
+        .table('user_data')
+        .select('sectors,notes')
+        .eq('user_id', request.user_id)
+        .maybe_single()
+        .execute()
+    )
+    if row.data:
+        return jsonify(row.data)
+    return jsonify({'sectors': [], 'notes': {}})
 
 
 @app.route('/api/state', methods=['POST'])
+@require_auth
 def save_state():
-    """儲存所有資料到 data.json"""
     data = request.get_json()
-    with open(DATA_FILE, 'w', encoding='utf-8') as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    _get_supa().table('user_data').upsert(
+        {
+            'user_id': request.user_id,
+            'sectors': data.get('sectors', []),
+            'notes':   data.get('notes', {}),
+        },
+        on_conflict='user_id',
+    ).execute()
     return '', 204
 
 

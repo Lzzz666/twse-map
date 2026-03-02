@@ -26,7 +26,15 @@
           "price": 314.5
         }
       ],
-      "foreignStocks": []
+      "foreignStocks": [
+        {
+          "symbol": "4062.T",
+          "name": "IBIDEN CO LTD",
+          "market": "JP",
+          "price": 9537,
+          "change": 2.8137
+        }
+      ]
     },
     {
       "id": "mm7j6if4hal",
@@ -256,7 +264,29 @@
           "change": 4.968944099378882
         }
       ],
-      "foreignStocks": []
+      "foreignStocks": [
+        {
+          "symbol": "AAOI",
+          "name": "Applied Optoelectronics, Inc.",
+          "market": "US",
+          "price": 84.23,
+          "change": 34.768
+        },
+        {
+          "symbol": "LITE",
+          "name": "Lumentum Holdings Inc.",
+          "market": "US",
+          "price": 700.91,
+          "change": 3.2496
+        },
+        {
+          "symbol": "COHR",
+          "name": "Coherent Corp.",
+          "market": "US",
+          "price": 258.93,
+          "change": 3.1676
+        }
+      ]
     },
     {
       "id": "mm7j6if4xlj",
@@ -333,7 +363,15 @@
           "price": 915
         }
       ],
-      "foreignStocks": []
+      "foreignStocks": [
+        {
+          "symbol": "FORM",
+          "name": "FormFactor, Inc.",
+          "market": "US",
+          "price": 98.88,
+          "change": 1.4154
+        }
+      ]
     },
     {
       "id": "mm7je2akhqs",

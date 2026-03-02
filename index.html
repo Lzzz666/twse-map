@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>台股板塊圖</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -13,6 +14,84 @@
       color: #1a1a1a;
       min-height: 100vh;
     }
+
+    /* ── Login Screen ── */
+    .login-screen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f4f4f6;
+    }
+    .login-card {
+      background: #fff;
+      border-radius: 14px;
+      border: 1px solid #e4e4e7;
+      padding: 36px 40px 32px;
+      width: 320px;
+      text-align: center;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+    }
+    .login-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .login-sub {
+      font-size: 13px;
+      color: #71717a;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .google-btn {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 8px;
+      border: 1px solid #d4d4d8;
+      background: #fff;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: background 0.12s, border-color 0.12s;
+      color: #1a1a1a;
+    }
+    .google-btn:hover { background: #f4f4f6; border-color: #a1a1aa; }
+
+    /* ── User info in header ── */
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-left: 4px;
+      padding-left: 12px;
+      border-left: 1px solid #e4e4e7;
+    }
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #18181b;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .user-email {
+      font-size: 12px;
+      color: #71717a;
+      max-width: 140px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    @media (max-width: 600px) { .user-email { display: none; } }
 
     /* ── Header ── */
     header {
@@ -520,6 +599,26 @@
 </head>
 <body>
 
+<!-- ── Login Screen ── -->
+<div id="loginScreen" class="login-screen" style="display:none">
+  <div class="login-card">
+    <div class="login-title">台股板塊圖</div>
+    <div class="login-sub">請登入以使用<br>你的個人板塊設定</div>
+    <button class="google-btn" onclick="signInWithGoogle()">
+      <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+        <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.717v2.258h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+        <path d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332C2.438 15.983 5.482 18 9 18z" fill="#34A853"/>
+        <path d="M3.964 10.71c-.18-.54-.282-1.117-.282-1.71s.102-1.17.282-1.71V4.958H.957C.347 6.173 0 7.548 0 9s.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+        <path d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0 5.482 0 2.438 2.017.957 4.958L3.964 6.29C4.672 4.163 6.656 3.58 9 3.58z" fill="#EA4335"/>
+      </svg>
+      使用 Google 登入
+    </button>
+  </div>
+</div>
+
+<!-- ── App Content ── -->
+<div id="appContent" style="display:none">
+
 <header>
   <h1>台股板塊圖</h1>
   <div class="header-right">
@@ -531,6 +630,11 @@
       匯入
       <input type="file" accept=".json" style="display:none" onchange="importJSON(event)">
     </label>
+    <div class="user-info">
+      <div class="user-avatar" id="userAvatar"></div>
+      <span class="user-email" id="userEmail"></span>
+      <button class="btn" onclick="signOut()">登出</button>
+    </div>
   </div>
 </header>
 
@@ -545,6 +649,9 @@
   </div>
 </main>
 
+</div><!-- end #appContent -->
+
+<!-- ── Modals（放在 appContent 外，避免被 display:none 影響）── -->
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
   <div class="modal">
     <h3 id="modalTitle">新增板塊</h3>
@@ -605,6 +712,77 @@
 <div class="toast" id="toast"></div>
 
 <script>
+// ── Auth ───────────────────────────────────────────────────────────────────
+let supabaseClient = null;
+
+async function initAuth() {
+  try {
+    const cfg = await fetch('/api/config').then(r => r.json());
+    supabaseClient = window.supabase.createClient(cfg.supabase_url, cfg.supabase_anon_key);
+  } catch {
+    toast('設定載入失敗，請重新整理');
+    return;
+  }
+
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    await _onSignIn(session);
+  } else {
+    _showLogin();
+  }
+
+  supabaseClient.auth.onAuthStateChange(async (event, session) => {
+    if (event === 'SIGNED_IN' && session) {
+      await _onSignIn(session);
+    } else if (event === 'SIGNED_OUT') {
+      _showLogin();
+    }
+  });
+}
+
+function _showLogin() {
+  document.getElementById('loginScreen').style.display = 'flex';
+  document.getElementById('appContent').style.display  = 'none';
+}
+
+async function _onSignIn(session) {
+  document.getElementById('loginScreen').style.display = 'none';
+  document.getElementById('appContent').style.display  = '';
+
+  const email = session.user.email || '';
+  document.getElementById('userEmail').textContent = email;
+  document.getElementById('userAvatar').textContent = (email[0] || '?').toUpperCase();
+
+  await load();
+  render();
+  refreshAll();
+}
+
+async function signInWithGoogle() {
+  await supabaseClient.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin },
+  });
+}
+
+async function signOut() {
+  sectors = [];
+  notes   = {};
+  render();
+  await supabaseClient.auth.signOut();
+}
+
+async function authFetch(url, options = {}) {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  return fetch(url, {
+    ...options,
+    headers: {
+      'Authorization': `Bearer ${session.access_token}`,
+      ...(options.headers || {}),
+    },
+  });
+}
+
 // ── Utilities ─────────────────────────────────────────────────────────────
 function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
@@ -632,11 +810,10 @@ function avg(stocks) {
 const MIS_API    = 'https://mis.twse.com.tw/stock/api/getStockInfo.jsp';
 const CORS_PROXY = 'https://corsproxy.io/?url=';
 
-// Parse one msgArray item → { name, market, change } or null
 function parseItem(item) {
   const price = parseFloat(item.z);
   const prev  = parseFloat(item.y);
-  const pz    = parseFloat(item.pz);           // last traded price (fallback)
+  const pz    = parseFloat(item.pz);
   const cur   = price > 0 ? price : (pz > 0 ? pz : null);
   return {
     name:   (item.n || '').trim(),
@@ -646,9 +823,7 @@ function parseItem(item) {
   };
 }
 
-// Query TWSE MIS API; returns Map<code, {name,market,change}>
 async function queryMIS(stocks) {
-  // 永遠兩個都查，讓 API 回傳有效的那個，避免 market 設錯漏抓
   const codes = [...new Set(stocks.map(st => st.code))];
   const parts = codes.flatMap(code => [`tse_${code}.tw`, `otc_${code}.tw`]);
   const rawUrl = `${MIS_API}?ex_ch=${parts.join('|')}&json=1&delay=0`;
@@ -723,9 +898,9 @@ const DEFAULT = [
 // ── State ──────────────────────────────────────────────────────────────────
 let sectors    = [];
 let editMode   = false;
-let modalMode  = null;   // 'add' | 'rename'
+let modalMode  = null;
 let renameId   = null;
-const sortStates = {};   // sectorId -> undefined | 'desc' | 'asc'
+const sortStates = {};
 
 function cycleSortState(id) {
   const cur = sortStates[id];
@@ -735,26 +910,8 @@ function cycleSortState(id) {
 
 // ── Persistence ────────────────────────────────────────────────────────────
 async function load() {
-  // ── 一次性遷移：把舊 localStorage 資料搬到 data.json ──
-  const oldSectors = localStorage.getItem('twse_sectors');
-  const oldNotes   = localStorage.getItem('twse_notes');
-  if (oldSectors || oldNotes) {
-    try {
-      sectors = JSON.parse(oldSectors || '[]');
-      notes   = JSON.parse(oldNotes   || '{}');
-      if (!sectors.length) sectors = DEFAULT;
-      sectors.forEach(s => { if (!s.foreignStocks) s.foreignStocks = []; });
-      await _persist();
-      localStorage.removeItem('twse_sectors');
-      localStorage.removeItem('twse_notes');
-      console.log('資料已從 localStorage 遷移至 data.json');
-    } catch { sectors = DEFAULT; notes = {}; }
-    return;
-  }
-
-  // ── 正常從 server 讀取 ──
   try {
-    const res  = await fetch('/api/state');
+    const res  = await authFetch('/api/state');
     const data = await res.json();
     sectors = data.sectors?.length ? data.sectors : DEFAULT;
     notes   = data.notes  || {};
@@ -762,14 +919,13 @@ async function load() {
   } catch { sectors = DEFAULT; notes = {}; }
 }
 
-// 防抖存檔：300ms 內多次呼叫只送一次請求
 let _saveTimer;
 function save() {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(_persist, 300);
 }
 function _persist() {
-  return fetch('/api/state', {
+  return authFetch('/api/state', {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify({ sectors, notes }),
@@ -778,12 +934,9 @@ function _persist() {
 
 // ── Render ─────────────────────────────────────────────────────────────────
 function render() {
-  const grid     = document.getElementById('grid');
-  const addCard  = grid.querySelector('.add-sector-card');
-
-  // Remove old cards
+  const grid    = document.getElementById('grid');
+  const addCard = grid.querySelector('.add-sector-card');
   grid.querySelectorAll('.sector-card').forEach(c => c.remove());
-
   sectors.forEach(s => grid.insertBefore(buildCard(s), addCard));
 }
 
@@ -791,7 +944,6 @@ function buildCard(sector) {
   const avgVal   = avg(sector.stocks);
   const sortMode = sortStates[sector.id];
 
-  // Sort display copy (never mutates stored order)
   let stocks = [...sector.stocks];
   if (sortMode === 'desc') stocks.sort((a, b) => (b.change ?? 0) - (a.change ?? 0));
   if (sortMode === 'asc')  stocks.sort((a, b) => (a.change ?? 0) - (b.change ?? 0));
@@ -800,12 +952,10 @@ function buildCard(sector) {
   card.className = 'sector-card';
   card.dataset.id = sector.id;
 
-  // Sort button icon & class
   const sortIcon  = sortMode === 'desc' ? '↓' : sortMode === 'asc' ? '↑' : '⇅';
   const sortCls   = sortMode === 'desc' ? 'sort-desc' : sortMode === 'asc' ? 'sort-asc' : '';
   const sortTitle = sortMode === 'desc' ? '漲跌高→低' : sortMode === 'asc' ? '漲跌低→高' : '依漲跌排序';
 
-  // Header
   const hdr = document.createElement('div');
   hdr.className = 'card-header';
   hdr.innerHTML = `
@@ -837,7 +987,6 @@ function buildCard(sector) {
     </div>`;
   card.appendChild(hdr);
 
-  // Stock list
   const list = document.createElement('div');
   list.className = 'stock-list';
   if (stocks.length === 0) {
@@ -861,7 +1010,6 @@ function buildCard(sector) {
   }
   card.appendChild(list);
 
-  // Add stock row
   const addRow = document.createElement('div');
   addRow.className = 'add-stock-row';
   addRow.innerHTML = `
@@ -918,7 +1066,7 @@ function confirmModal() {
   const name = document.getElementById('modalInput').value.trim();
   if (!name) return;
   if (modalMode === 'add') {
-    sectors.push({ id: uid(), name, stocks: [] });
+    sectors.push({ id: uid(), name, stocks: [], foreignStocks: [] });
     toast(`已新增「${name}」`);
   } else {
     const s = sectors.find(s => s.id === renameId);
@@ -944,7 +1092,6 @@ async function refreshAll() {
   btn.disabled = true;
   btn.textContent = '更新中…';
 
-  // Collect unique stocks across all sectors
   const seen = new Map();
   sectors.forEach(s => s.stocks.forEach(st => {
     if (!seen.has(st.code)) seen.set(st.code, st);
@@ -1058,10 +1205,8 @@ function toast(msg) {
 }
 
 // ── Notes ──────────────────────────────────────────────────────────────────
-let notes      = {};   // { "代號": "備忘文字", ... }
-let notesStock = null; // 目前開啟的股票 { code, name, price, change }
-
-// notes 讀取整合在 load() 內，儲存整合在 save() 內
+let notes      = {};
+let notesStock = null;
 
 function openNotesModal(code, name, price, change) {
   notesStock = { code, name, price, change };
@@ -1116,7 +1261,6 @@ function fmtForeignPrice(price, market) {
   return price.toFixed(2);
 }
 
-// 批次取得外股報價（呼叫本地 Flask /api/quote）
 async function fetchForeignQuotes(symbols) {
   if (!symbols.length) return new Map();
   const res  = await fetch(`/api/quote?symbols=${symbols.join(',')}`);
@@ -1124,7 +1268,6 @@ async function fetchForeignQuotes(symbols) {
   return new Map(Object.entries(data));
 }
 
-// 單一代號搜尋（含名稱，用於新增時驗證）
 async function searchForeignSymbol(symbol) {
   const res = await fetch(`/api/search?symbol=${encodeURIComponent(symbol)}`);
   if (!res.ok) return null;
@@ -1178,7 +1321,6 @@ function renderForeignModal() {
       </div>`;
   }).join('');
 
-  // 點擊外股列開啟備忘
   list.querySelectorAll('.foreign-stock-row').forEach(row => {
     row.onclick = e => {
       if (e.target.closest('.rm-btn')) return;
@@ -1260,9 +1402,7 @@ function removeForeignStock(symbol) {
 
 // ── Init ───────────────────────────────────────────────────────────────────
 (async () => {
-  await load();
-  render();
-  refreshAll();
+  await initAuth();
 })();
 </script>
 </body>
