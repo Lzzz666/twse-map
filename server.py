@@ -144,6 +144,11 @@ def search():
     except Exception as e:
         return jsonify({'error': str(e)}), 404
 
+@app.route('/health')  
+def health():  
+    """健康檢查端點"""  
+    return jsonify({'status': 'ok'}), 200  
+
 
 if __name__ == '__main__':
     print('啟動中  →  http://localhost:3001')
