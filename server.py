@@ -15,11 +15,15 @@ SUPABASE_SERVICE_KEY = os.environ.get('SUPABASE_SERVICE_KEY', '')
 _supa = None
 
 
-def _get_supa():
-    global _supa
-    if _supa is None:
-        _supa = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)
-    return _supa
+def _get_supa():  
+    global _supa  
+    if _supa is None:  
+        try:  
+            _supa = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY)  
+        except Exception as e:  
+            print(f"Warning: Supabase initialization failed: {e}")  
+            _supa = None  
+    return _supa  
 
 
 def require_auth(f):
